@@ -60,10 +60,12 @@ BamfWindow::BamfWindow(const QString &path, const QDBusConnection &connection) :
 		QDBusPendingReply<QString> desktopFileReply(application.DesktopFile());
 		desktopFileReply.waitForFinished();
 		if (desktopFileReply.isError()) {
+			// bamf can re-match a window to another application between our
+			// Parents() and DesktopFile() calls, and the application we asked
+			// about is gone. Keep the window with the window id as application
+			// id, as for an application without a desktop file.
 			qWarning() << _("Could not get desktop file for") << path
 					<< desktopFileReply.error();
-			m_error = true;
-			return;
 		} else {
 			QString desktopFile(desktopFileReply);
 			if (!desktopFile.isEmpty()) {

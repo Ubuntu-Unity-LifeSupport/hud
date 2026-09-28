@@ -254,6 +254,58 @@ TEST_F(TestBamfWindowStack, HandlesMissingWindow) {
 	ASSERT_EQ(0, windowInfos.size());
 }
 
+// bamf re-matches a window to another application, and the one Parents()
+// named can be gone before DesktopFile() is asked: the window stays, with its
+// id as application id.
+TEST_F(TestBamfWindowStack, HandlesWindowWhoseApplicationIsGone) {
+	createWindow(0, 7); // application 7 is never exported
+	createMatcherMethods(1, 0);
+
+	qDebug() << "EXPECTED ERROR BELOW";
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	qDebug() << "EXPECTED ERROR ABOVE";
+
+	QList<WindowInfo> windowInfos(windowStack.GetWindowStack());
+	ASSERT_EQ(1, windowInfos.size());
+	EXPECT_EQ(WindowInfo(0, "0", true, WindowInfo::MAIN), windowInfos.at(0));
+}
+
+TEST_F(TestBamfWindowStack, WindowCreatedWhenApplicationIsGone) {
+	createApplication(0);
+	createWindow(0, 0);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	QSignalSpy windowCreatedSpy(&windowStack,
+	SIGNAL(WindowCreated(uint, const QString &)));
+
+	createWindow(5, 9); // application 9 is never exported
+	qDebug() << "EXPECTED ERROR BELOW";
+	windowOpened(windowPath(0), windowPath(5));
+	windowCreatedSpy.wait();
+	qDebug() << "EXPECTED ERROR ABOVE";
+	ASSERT_EQ(1, windowCreatedSpy.size());
+	EXPECT_EQ(QVariantList() << uint(5) << "5", windowCreatedSpy.at(0));
+}
+
+TEST_F(TestBamfWindowStack, WindowDestroyedWhenApplicationWasGone) {
+	createApplication(0);
+	createWindow(0, 0);
+	createWindow(1, 7); // application 7 is never exported
+	createMatcherMethods(2, 0);
+
+	qDebug() << "EXPECTED ERROR BELOW";
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	qDebug() << "EXPECTED ERROR ABOVE";
+	QSignalSpy windowDestroyedSpy(&windowStack,
+	SIGNAL(WindowDestroyed(uint, const QString &)));
+
+	windowClosed(windowPath(1), windowPath(0));
+	windowDestroyedSpy.wait();
+	ASSERT_EQ(1, windowDestroyedSpy.size());
+	EXPECT_EQ(QVariantList() << uint(1) << "1", windowDestroyedSpy.at(0));
+}
+
 TEST_F(TestBamfWindowStack, GetWindowPropertiesForBrokenWindow) {
 	createWindow(0, 0, false);
 	createApplication(0);
