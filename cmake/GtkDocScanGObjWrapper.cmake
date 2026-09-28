@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 
 if(NOT APPLE)
     # We use pkg-config to fing glib et al

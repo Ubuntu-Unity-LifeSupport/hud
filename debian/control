@@ -30,7 +30,7 @@ Build-Depends: cmake (>= 3.4),
                python3-setuptools,
                qtbase5-dev,
                qtdbustest-runner,
-               systemd,
+               systemd-dev,
                valac,
                xvfb,
 Standards-Version: 3.9.4
