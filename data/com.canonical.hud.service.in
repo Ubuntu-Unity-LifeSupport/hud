@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=com.canonical.hud
+Exec=@pkglibexecdir@/hud-service
+SystemdService=hud.service

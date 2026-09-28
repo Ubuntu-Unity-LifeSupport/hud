@@ -1,0 +1,57 @@
+{
+  "id": 0,
+  "submenu": [
+      {
+        "id": 1,
+        "label": 'link',
+        "submenu": [
+            {
+              "id": 2,
+              "label": 'bowl'
+            },
+            {
+              "id": 3,
+              "label": 'mine let'
+            }
+        ]
+      },
+      {
+        "id": 4,
+        "label": 'dare',
+        "submenu": [
+            {
+              "id": 5,
+              "label": 'mess strand'
+            }
+        ]
+      },
+      {
+        "id": 6,
+        "label": 'piece hook',
+        "submenu": [
+            {
+              "id": 7,
+              "label": 'stray slash'
+            },
+            {
+              "id": 8,
+              "label": 'swift sad'
+            }
+        ]
+      },
+      {
+        "id": 9,
+        "label": 'spaghetti',
+        "submenu": [
+            {
+              "id": 10,
+              "label": 'itch step'
+            },
+            {
+              "id": 11,
+              "label": 'any rash'
+            }
+        ]
+      }
+  ]
+}

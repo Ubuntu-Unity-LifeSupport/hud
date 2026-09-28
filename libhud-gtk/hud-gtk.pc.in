@@ -1,0 +1,11 @@
+libdir=@libdir@
+includedir=@includedir@
+
+Cflags: -I${includedir}/libhud-gtk-@apiversion@
+Requires: glib-2.0 hud-1
+Libs: -L${libdir} -lhud-gtk
+
+Name: libhud-gtk
+Description: A library to submit items into the HUD with GTK+ helpers
+Version: @VERSION@
+

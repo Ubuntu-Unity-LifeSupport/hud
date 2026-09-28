@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Hud Gui
+Comment=Test user interface for HUD
+TryExec=hud-gtk
+Exec=hud-gtk
+Icon=
+Type=Application
+Categories=Utility;
+StartupNotify=true
+OnlyShowIn=Unity;
+Keywords=
+Actions=

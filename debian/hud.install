@@ -1,0 +1,6 @@
+debian/hud-crashdb.conf /etc/apport/crashdb.conf.d
+debian/source_hud.py /usr/share/apport/package-hooks
+usr/lib/*/hud
+usr/share/dbus-1
+usr/share/glib-2.0
+usr/lib/systemd

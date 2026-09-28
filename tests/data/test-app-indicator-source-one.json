@@ -1,0 +1,17 @@
+{
+  "id": 0,
+  "submenu": [
+      {
+        "id": 1,
+        "label": 'Hello There'
+      },
+      {
+        "id": 2,
+        "label": 'Goodbye'
+      },
+      {
+        "id": 3,
+        "label": 'Hallo Again'
+      }
+  ]
+}

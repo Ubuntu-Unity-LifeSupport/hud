@@ -1,0 +1,985 @@
+hud (14.10+17.10.20170619-0ubuntu6) noble; urgency=medium
+
+  * Bump C++ version to C++14 to make googletest happy.
+
+ -- Aaron Rainbolt <arraybolt3@ubuntu.com>  Tue, 09 Apr 2024 14:57:11 -0500
+
+hud (14.10+17.10.20170619-0ubuntu5) noble; urgency=medium
+
+  * No-change rebuild against libglib2.0-0t64
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 08 Mar 2024 05:04:59 +0000
+
+hud (14.10+17.10.20170619-0ubuntu4) hirsute; urgency=medium
+
+  * Fix FTBFS:
+    - common/HudDee.cpp: Include <string>.
+    - Build-depend on libgmock-dev.
+
+ -- Logan Rosen <logan@ubuntu.com>  Wed, 07 Apr 2021 16:03:50 -0400
+
+hud (14.10+17.10.20170619-0ubuntu3.1) focal; urgency=medium
+
+  [ Khurshid Alam ]
+  * Fix build against vala >= 0.48.x
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 16 Mar 2020 15:30:46 +0100
+
+hud (14.10+17.10.20170619-0ubuntu3) focal; urgency=medium
+
+  [ Khurshid Alam ]
+  * Add python3 in build-depends
+  * Disable gtk-doc for now. It can be enabled later.
+    Gtkdoc-mktmpl was removed from gtk-doc >= 1.26. Instead it now,
+    itself, provides GtkDocConfig.cmake module but doesn't say much
+    about the migration other than
+    https://developer.gnome.org/gtk-doc-manual/stable/cmake.html.en.
+    So disable it until it is fixed. Fixes LP: #1866180
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 05 Mar 2020 13:41:50 +0100
+
+hud (14.10+17.10.20170619-0ubuntu2) bionic; urgency=medium
+
+  * No change rebuild against libdbusmenu-qt5-2.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Tue, 30 Jan 2018 22:52:53 +0300
+
+hud (14.10+17.10.20170619-0ubuntu1) artful; urgency=medium
+
+  * Rename ubuntu-session systemd target to unity-session to inline with
+    new session name:
+    - ship hud service symlink in the new systemd target.
+    - Breaks against older version of ubuntu-session, now that unity-session
+      provides that new systemd target name.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 19 Jun 2017 11:17:52 +0200
+
+hud (14.10+17.10.20170618-0ubuntu1) artful; urgency=medium
+
+  * Build with vala 0.36
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Sun, 18 Jun 2017 00:49:11 +0000
+
+hud (14.10+17.04.20170106.1-0ubuntu1) zesty; urgency=medium
+
+  * Compatibility with unversioned cmake-extras modules. Remove inactive
+    and broken valgrind / memcheck support. (LP: #1563573)
+
+ -- Pete Woods <pete.woods@canonical.com>  Fri, 06 Jan 2017 18:09:58 +0000
+
+hud (14.10+17.04.20161202-0ubuntu1) zesty; urgency=medium
+
+  * Use cmake-extras to find GMock
+
+ -- Pete Woods <pete.woods@canonical.com>  Fri, 02 Dec 2016 12:36:05 +0000
+
+hud (14.10+17.04.20161026-0ubuntu1) zesty; urgency=medium
+
+  [ Sebastien Bacher ]
+  * Switch the user session to systemd. Remove the dbus activation hacks
+    and
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 26 Oct 2016 12:38:31 +0000
+
+hud (14.10+16.04.20160415-0ubuntu1) xenial; urgency=medium
+
+  [ Andrea Azzarone ]
+  * Introduce DBusMenuWindowCollector to make it possible to expose the
+    window actions menu through dbusmenu. (LP: #1570812)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Fri, 15 Apr 2016 11:58:16 +0000
+
+hud (14.10+15.10.20151012-0ubuntu1) wily; urgency=medium
+
+  [ Andrea Azzarone ]
+  * Limit the number of menus exported to slow down memory leaks.
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 12 Oct 2015 14:37:24 +0000
+
+hud (14.10+15.10.20150820.1-0ubuntu1) wily; urgency=medium
+
+  [ Pete Woods ]
+  * Make the qtgmenu tests more robust added: common/GDBusHelper.h
+  * Make valgrind happy on local builds. Disable for Jenkins / LP.
+    Remove remaining traces of platform API. added: libhud-
+    client/libhud-client.map libhud/libhud.map
+  * Remove unity-voice (LP: #1483210)
+
+  [ Ted Gould ]
+  * Make valgrind happy on local builds. Disable for Jenkins / LP.
+    Remove remaining traces of platform API. added: libhud-
+    client/libhud-client.map libhud/libhud.map
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 20 Aug 2015 13:46:00 +0000
+
+hud (14.10+14.10.20140924-0ubuntu4) wily; urgency=medium
+
+  * No-change rebuild against libcolumbus1v5 (again)
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 09 Aug 2015 00:08:13 +0000
+
+hud (14.10+14.10.20140924-0ubuntu3) wily; urgency=medium
+
+  * cmake/GtkDocScanGObjWrapper.cmake: set cmake_minimum_required(VERSION 2.6)
+    for compatibility with cmake 3.2's pkg-config macros, fixing a build 
+    failure.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 08 Aug 2015 21:37:01 +0000
+
+hud (14.10+14.10.20140924-0ubuntu2) wily; urgency=medium
+
+  * No-change rebuild against libcolumbus1v5
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 08 Aug 2015 19:29:11 +0000
+
+hud (14.10+14.10.20140924-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Drop DBus envvar workaround
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 24 Sep 2014 09:25:59 +0000
+
+hud (14.10+14.10.20140617-0ubuntu1) utopic; urgency=medium
+
+  [ Pete Woods ]
+  * Forward port changes from trusty.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 17 Jun 2014 11:23:25 +0000
+
+hud (14.04+14.04.20140604-0ubuntu1) trusty; urgency=medium
+
+  [ Pete Woods ]
+  * Resolve crasher in previous attempted SRU. (LP: #1298656)
+    - Fix order of menu traversal.
+    - Add timeout to legacy HUD queries.
+    - Improve legacy menu safety valve trigger.
+    - Remove duplicate entries in upstart job.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 04 Jun 2014 14:04:12 +0000
+
+hud (13.10.1+14.10.20140609-0ubuntu1) utopic; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Ricardo Mendoza ]
+  * Drop support for Platform API (SF)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 09 Jun 2014 14:06:31 +0000
+
+hud (13.10.1+14.04.20140425-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Harden HUD against misbehaving applications Report the offending
+    applications using Apport's recoverable problem tool. Switch to
+    using shared pointers where possible for managing memory. (LP:
+    #1298656)
+
+  [ Marcus Tomlinson ]
+  * Harden HUD against misbehaving applications Report the offending
+    applications using Apport's recoverable problem tool. Switch to
+    using shared pointers where possible for managing memory. (LP:
+    #1298656)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 25 Apr 2014 08:48:46 +0000
+
+hud (13.10.1+14.04.20140402-0ubuntu2) utopic; urgency=medium
+
+  * No-change rebuild for shlib changes in qtbase and qtdeclarative.
+
+ -- Ricardo Salveti de Araujo <ricardo.salveti@canonical.com>  Tue, 29 Apr 2014 09:29:40 -0700
+
+hud (13.10.1+14.04.20140402-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Make the DBusMenu safety valve actually work this time (LP:
+    #1280372)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 02 Apr 2014 10:38:40 +0000
+
+hud (13.10.1+14.04.20140326-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Add safety valve for DBusMenuCollector that also reports the
+    offending application (LP: #1280372)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 26 Mar 2014 09:36:22 +0000
+
+hud (13.10.1+14.04.20140325-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Simplify the implementation of QtGActionGroup. This started off with
+    the intent of removing the overhead of g_action_group_list_actions()
+    in QtGActionGroup::Action(), but then I found
+    QtGActionGroup::Action() was only called in the object's constructor
+    and destructor, so it made more sense to remove the function
+    altogether. Summary of changes:   * Plugged GVariant leak in
+    QtGActionGroup::TriggerAction()   * Plugged char* leak in
+    QtGMenuUtils::makeStringListQVariant   * ActionGroup ctor calls
+    g_action_group_list_actions() once instead of n+1 times   *
+    ActionGroup dtor calls g_action_group_list_actions() once instead of
+    n times   * Removed unused public method Size()   * Removed newly-
+    unused public method Action()   * Removed newly-unused field m_size
+    (LP: #1296746)
+
+  [ Pete Woods ]
+  * Add null guards to ItemStore search (LP: #1292237)
+  * Fix test failures exposed by fix to libqtdbustest (LP: #1296744)
+  * Call only "safe" write method from UNIX signal handler See
+    http://pubs.opengroup.org/onlinepubs/000095399/functions/xsh_chap02_
+    04.html#tag_02_04_01 (LP: #1296602)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 25 Mar 2014 12:46:25 +0000
+
+hud (13.10.1+14.04.20140314-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Make legacy queries return no results with an empty search string
+    (LP: #1276569)
+  * Tweak search parameters following advice from Jussi (LP: #1276569)
+  * Use new DBusMenu API to make dbusmenu calls sync (LP: #1292586)
+  * Support multiple GMenuCollectors for each window, and multiple
+    QtGActionGroups for each QtGMenuModel. (LP: #1288025)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 14 Mar 2014 16:37:38 +0000
+
+hud (13.10.1+14.04.20140304-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Change GTK documentation so that it builds with the new glib version
+    (LP: #1287580)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 04 Mar 2014 09:58:04 +0000
+
+hud (13.10.1+14.04.20140218.2-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Abstract out settings for improved testability (LP: #1280559)
+  * Prevent rare crash when first opening dbusmenu window
+
+  [ Marcus Tomlinson ]
+  * Store actions for entire QtGMenuModel hierarchy in top menu
+    m_actions (LP: #1276225)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 18 Feb 2014 14:29:30 +0000
+
+hud (13.10.1+14.04.20140212-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Make UTF8-safe implementation of nih_dbus_path (LP: #1278439)
+  * Use deleteLater to avoid crash in destruction of QGSettings (LP:
+    #1278440)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 12 Feb 2014 13:50:40 +0000
+
+hud (13.10.1+14.04.20140206-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Re-enable quit action in HUD client library. (LP: #1269409)
+  * Extra checks for null DBusMenuCollector
+
+  [ Marcus Tomlinson ]
+  * Cache size of QtGActionGroup in m_size rather and re-calculating it
+    on every Size() call. (LP: #1276225)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 06 Feb 2014 11:58:43 +0000
+
+hud (13.10.1+14.04.20140120-0ubuntu1) trusty; urgency=low
+
+  * New rebuild forced
+  * Automatic snapshot from revision 362
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 20 Jan 2014 19:43:59 +0000
+
+hud (13.10.1+14.04.20140108-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Replace core HUD service and improve testing.
+  * Generate valid window stack introspection XML. (LP: #1254949)
+  * Fix window stack breakage introduced by last commit.
+  * Build application paths using NIH DBus utils to maintain
+    compatibility with confinement policies. (LP: #1262316)
+  * Restore keyword reading functionality to libQtGmenu. (LP: #1262323,
+    #1262326, #1262318)
+  * Restore the sqlite database reading functionality. (LP: #1262320)
+  * Valgrind is not available on all platforms.
+
+  [ Ted Gould ]
+  * Search for Pango so we can build the command line utilities.
+
+  [ Marcus Tomlinson ]
+  * Replace core HUD service and improve testing.
+  * Check window handle is not null before attempting to dereferencing
+    it.
+  * Remove unnecessary polling from QtGMenuImporter to reduce DBus
+    comms. (LP: #1262333)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 361
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 08 Jan 2014 03:21:14 +0000
+
+hud (13.10.1+14.04.20131205-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Fix keywords test on ARM. (LP: #1257861)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 350
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 05 Dec 2013 09:35:45 +0000
+
+hud (13.10.1+14.04.20131204-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * In the window stack always return a property list of the correct
+    length.
+  * Initialize the current_source pointer. (LP: #1253676)
+
+  [ Ted Gould ]
+  * Improve handling of unfound windows. (LP: #1247898)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 04 Dec 2013 13:51:14 +0000
+
+hud (13.10.1+14.04.20131029.1-0ubuntu1) trusty; urgency=low
+
+  [ Pete Woods ]
+  * Fix the ref counting of application sources The application sources
+    are now entirely owned by the application-list's hash table.
+
+  [ Ted Gould ]
+  * Add apport dependencies to the package hook. (LP: #1233994)
+  * Don't show disabled items in search results. (LP: #1192646)
+
+  [ Charles Kerr ]
+  * Add a nullptr safeguard to prevent a crash-on-null-ptr-reference.
+    Also, move a QMap lookup outside of a for loop. Yay! . (LP:
+    #1242032)
+  * if we can't get the busname, log a g_critical and then exit
+    gracefully instead of abort()ing in g_error. (LP: #1244688)
+  * Add a null safeguard when accessing window SharedPtrs held in the
+    m_windows QMap . (LP: #1243654)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 343
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 29 Oct 2013 11:17:56 +0000
+
+hud (13.10.1+13.10.20131031-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * If we can't get the busname, log a g_critical and then exit
+    gracefully instead of abort()ing in g_error. (LP: #1244688)
+  * Add a null safeguard when accessing window SharedPtrs held in the
+    m_windows QMap. (LP: #1243654)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 344
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 31 Oct 2013 23:12:19 +0000
+
+hud (13.10.1+13.10.20131024-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Fix the ref counting of application sources The application sources
+    are now entirely owned by the application-list's hash table.
+
+  [ Ted Gould ]
+  * Add apport dependencies to the package hook. (LP: #1233994)
+  * Don't show disabled items in search results. (LP: #1192646)
+  * Don't crash if we get asked about a window we don't know about,
+    return a null list. (LP: #1242339)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 341
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 24 Oct 2013 16:12:43 +0000
+
+hud (13.10.1+13.10.20131014-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Fix crash on window removal. (LP: #1238338)
+  * Fix application disposal, so HUD doesn't crash for apps with no
+    actions.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 336
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 14 Oct 2013 08:53:02 +0000
+
+hud (13.10.1+13.10.20131010.1-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Handle errors from the BAMF interface It looks like windows are
+    sometimes disappearing before we get round to asking for information
+    about them. (LP: #1238002)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 333
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Oct 2013 18:43:20 +0000
+
+hud (13.10.1+13.10.20131010-0ubuntu1) saucy; urgency=low
+
+  [ Loïc Minier ]
+  * Fix build-deps for desktop build.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 331
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Oct 2013 02:23:33 +0000
+
+hud (13.10.1+13.10.20131009.1-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Support unity8's window stack API. (LP: #1233992)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 329
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 09 Oct 2013 23:26:00 +0000
+
+hud (13.10.1+13.10.20131009-0ubuntu1) saucy; urgency=low
+
+  [ Dmitrijs Ledkovs ]
+  * Use /bin/sh instead of /bin/bash in the dbus activation script, to
+    speed up execution.
+
+  [ Pete Woods ]
+  * Improve HUD's voice error handling for when either nothing is said,
+    or the mic isn't working.
+  * Working around the missing session bus variable and reporting a bug.
+
+  [ Ted Gould ]
+  * Working around the missing session bus variable and reporting a bug.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 326
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 09 Oct 2013 12:24:00 +0000
+
+hud (13.10.1+13.10.20131008.1-0ubuntu1) saucy; urgency=low
+
+  [ Dmitrijs Ledkovs ]
+  * Use /bin/sh instead of /bin/bash in the dbus activation script, to
+    speed up execution.
+
+  [ Pete Woods ]
+  * Improve HUD's voice error handling for when either nothing is said,
+    or the mic isn't working.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 325
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 08 Oct 2013 12:50:58 +0000
+
+hud (13.10.1+13.10.20131002.1-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Raise an error instead of a warning if we can't get our hands on the
+    HUD service name.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 322
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 02 Oct 2013 11:54:52 +0000
+
+hud (13.10.1+13.10.20130918-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Handle searches that result in no tokens as NULL searches. (LP:
+    #1193700)
+
+  [ Antti Kaijanmäki ]
+  * Fix search results when application starts and also include
+    ALL_WINDOWS context on different searches. (LP: #1205097). (LP:
+    #1205097)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 320
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 18 Sep 2013 07:10:50 +0000
+
+hud (13.10.1+13.10.20130904-0ubuntu1) saucy; urgency=low
+
+  [ Jamie Strandboge ]
+  * use libnih-dbus to generate object path name (LP: #1218107) -
+    CMakeLists.txt: add NIH_INCLUDE_DIRS and NIH_DBUS_INCLUDE_DIRS -
+    src/CMakeLists.txt: add NIH_LIBRARIES and NIH_DBUS_LIBRARIES -
+    src/application-source.c: use nih_dbus_path() - debian/control:
+    Build-Depends on libnih-dbus-dev. (LP: #1218107)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 317
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 04 Sep 2013 02:35:31 +0000
+
+hud (13.10.1+13.10.20130822.4-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Fix hud client-reconnects on the phone This branch fixes hud-
+    clients's ability to seamlessly reconnect to HUD. (LP: #1205097)
+
+  [ Ted Gould ]
+  * Migrate from g_simple_action_group_insert to
+    g_action_map_add_action. (LP: #1215180)
+
+  [ Antti Kaijanmäki ]
+  * Fix Ubuntu UI Session callbacks. On Touch Images where we use Ubuntu
+    UI Session API to get notifications when active window changes. The
+    callbacks are being invoked from a separate thread. We have to pass
+    the callbacks through g_idle_add() to process them in main
+    gmaincontext. This also requires to change the type of
+    AbstractWindow and AbstractApp as we can't pass on the
+    ubuntu_ui_session_properties accross different threads. (LP:
+    #1205097, #1203772, #1214996)
+  * Fix hud client-reconnects on the phone This branch fixes hud-
+    clients's ability to seamlessly reconnect to HUD. (LP: #1205097)
+  * g_simple_action_group_lookup() was deprecated. use
+    g_action_map_lookup_action() instead.
+  * Adjust watchdog test limits to get rid of random timing failures.
+    (LP: #1215180)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 315
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 22 Aug 2013 18:12:30 +0000
+
+hud (13.10.1+13.10.20130816.1-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Patch up hud-gtk.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 309
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 16 Aug 2013 22:09:30 +0000
+
+hud (13.10.1+13.10.20130812-0ubuntu1) saucy; urgency=low
+
+  * New rebuild forced
+  * Automatic snapshot from revision 307
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 12 Aug 2013 11:58:36 +0000
+
+hud (13.10.1+13.10.20130731-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * Don't build-depend on gnome-doc-utils.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 306
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 31 Jul 2013 03:02:00 +0000
+
+hud (13.10.1+13.10.20130719-0ubuntu1) saucy; urgency=low
+
+  [ Łukasz 'sil2100' Zemczak ]
+  * Do not install hud-tools tests, it's not needed. Especially that the
+    test install directory is sooo wrong.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 304
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 19 Jul 2013 03:01:43 +0000
+
+hud (13.10.1+13.10.20130717-0ubuntu1) saucy; urgency=low
+
+  [ Antti Kaijanmäki ]
+  * Fix hud-service emitting multiple UpdatedQuery signals.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 302
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 17 Jul 2013 03:06:37 +0000
+
+hud (13.10.1+13.10.20130715-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * * Drop explicit build-depends on gir1.2-dee-1.0 * Build against
+    default valac.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 300
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 15 Jul 2013 03:16:53 +0000
+
+hud (13.10.1+13.10.20130710-0ubuntu1) saucy; urgency=low
+
+  [ Antti Kaijanmäki ]
+  * libhud: * Don't try to unexport menu model if it's exporting failed.
+    * g_critical() instead of g_error().
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 298
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 10 Jul 2013 06:24:02 +0000
+
+hud (13.10.1+13.10.20130703-0ubuntu1) saucy; urgency=low
+
+  [ Antti Kaijanmäki ]
+  * * libhud: - cache active contexts so that they can be restored on
+    (re)connect * hud-service: - add debug information on window context
+    switching.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 296
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 03 Jul 2013 03:01:12 +0000
+
+hud (13.10.1+13.10.20130702-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Checking for the NULL return.
+
+  [ Antti Kaijanmäki ]
+  * * Ignore deprecation warning with
+    bamf_application_get_application_menu(). * add WindowStackForMonitor
+    to test-application-list.c dbusmock.
+  * Fix parameterized actions which were broken by r283.
+  * Search also ALL_WINDOWS context.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 294
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 02 Jul 2013 03:03:11 +0000
+
+hud (13.10.1daily13.06.19-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Support unity-gtk-module exported menus.
+  * Don't clear the last focused pointer when we get a NULL new window.
+  * Don't create an endpoint with bad names.
+  * Upstart job, dbus activation hack.
+  * When failing to start the proxy, don't cause criticals.
+  * Fixing critical messages from Dee and GSignal.
+  * Extending dbus-activation hack to non-upstart sessions.
+  * Adding a WindowType to the BAMF Window Mock.
+  * Increase timeouts and further push out voice init for the phone.
+  * Adds the ability to switch contexts in the application sources. This
+    required splitting out a bunch code into a new context object.
+    Unfortunately a big change.
+  * Complete toolbar support.
+  * Making file naming consistent.
+  * When creating a new matcher get the focused window.
+  * Don't trust BAMF to give us a correct application when windows are
+    being closed.
+  * Clear the refresh id when running the idle function.
+  * Refresh models who are base models not leaf models.
+
+  [ Antti Kaijanmäki ]
+  * Adds the ability to switch contexts in the application sources. This
+    required splitting out a bunch code into a new context object.
+    Unfortunately a big change.
+  * libhud/action-publisher.c: * fix use-after-free if exporting of a
+    publisher fails * fix the overall publisher export logic * fix
+    memory leak when freeing HudActionPublisherActionGroupSet.
+
+  [ Didier Roche ]
+  * remove julius, we have sphinx-voxforge now.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 289
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Jun 2013 03:53:18 +0000
+
+hud (13.10.1daily13.06.05.1-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Merge the remaining HUD 2.0 branch contents.
+  * Fix voice on the device Have to duplicate the call to cmd_ln_init to
+    handle each case, it won't accept NULL arguments. (LP: #1177226)
+  * Switch acoustic model over to using voxforge-sphinx now that it's in
+    the archive.
+
+  [ Ted Gould ]
+  * Make sure the paren always has data to show. (LP: #1172228)
+  * Test that pinging the watchdog with NULL isn't an error.
+  * Allow applications to define a context for actions.
+  * If the service has disappeared request a start when updating the
+    query. (LP: #1181289)
+  * Ensuring the models are sync'd before reporting the query is built.
+    (LP: #1183520)
+  * Destroy queries when the client disappears off DBus.
+  * Remove unused test and cleanup dependencies.
+  * Load model schema to ensure matching with service.
+  * Use shared search update function in voice search.
+  * Diable appstack search by default.
+  * Make sure we get the query parameter before construct is called.
+  * Lazily load voice engine when doing voice queries.
+  * Adds in detection of the highlights in both the command and the
+    description.
+
+  [ Łukasz 'sil2100' Zemczak ]
+  * Fixes related to unit tests - increase the number of session waits
+    (SESSION_MAX_WAIT) to 20.
+  * Temporarily disable the test-source unit test since it's failing on
+    non-Android armhf systems. Also, tweak up a bit some of the timeouts
+    for slower systems.
+
+  [ Albert Astals ]
+  * Return true instead of false It is still un-implemented but this way
+    the Shell can start using this function and have the same behaviour
+    it had.
+
+  [ Ricardo Mendoza ]
+  * * Remove libhybris dep * Update platform API includes * Update
+    platform API usage * Get rid of hybris references.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 270
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Jun 2013 12:33:44 +0000
+
+hud (13.10.1daily13.05.30ubuntu.unity.next-0ubuntu1) raring; urgency=low
+
+  [ Ted Gould ]
+  * If the service has disappeared request a start when updating the
+    query. (LP: #1181289)
+
+  [ Ricardo Mendoza ]
+  * * Remove libhybris dep * Update platform API includes * Update
+    platform API usage * Get rid of hybris references.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 259 (ubuntu-unity/next)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 30 May 2013 03:01:47 +0000
+
+hud (13.10.1daily13.05.23ubuntu.unity.next-0ubuntu1) raring; urgency=low
+
+  [ Ted Gould ]
+  * Bumping the number to make diffs more plesant.
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/control:
+    - Update Vcs-Bzr and Vcs-Browser to point to the correct branches for
+      phablet.
+  * debian/rules:
+    - build with ENABLE_PLATFORM_API=ON on armhf.
+    - drop --parallel; give us a better chance to build successfully.
+
+  [ Pete Woods ]
+  * Merge the remaining HUD 2.0 branch contents.
+  * Fix voice on the device Have to duplicate the call to cmd_ln_init to
+    handle each case, it won't accept NULL arguments. (LP: #1177226)
+  * Switch acoustic model over to using voxforge-sphinx now that it's in
+    the archive.
+
+  [ Ted Gould ]
+  * Make sure the paren always has data to show. (LP: #1172228)
+  * Test that pinging the watchdog with NULL isn't an error.
+  * Allow applications to define a context for actions.
+
+  [ Albert Astals ]
+  * Return true instead of false It is still un-implemented but this way
+    the Shell can start using this function and have the same behaviour
+    it had.
+
+  [ Łukasz 'sil2100' Zemczak ]
+  * Fixes related to unit tests - increase the number of session waits
+    (SESSION_MAX_WAIT) to 20.
+  * Temporarily disable the test-source unit test since it's failing on
+    non-Android armhf systems. Also, tweak up a bit some of the timeouts
+    for slower systems.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 256 (ubuntu-unity/next)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 23 May 2013 03:01:28 +0000
+
+hud (13.10.0-0ubuntu1~ppa2) quantal; urgency=low
+
+  * Don't spin CPU at 100% when closing share-app (LP: #1131186)
+
+ -- Albert Astals Cid  <albert.astals@canonical.com>  Fri, 22 Feb 2013 12:08:19 +0100
+
+hud (13.10.0-0ubuntu1~ppa1) quantal; urgency=low
+
+  * Upstream release of many, many changes.
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 20 Feb 2013 09:28:40 -0600
+
+hud (13.04.0daily13.04.03-0ubuntu1) raring; urgency=low
+
+  [ Michael Terry ]
+  * HUD test suite requires some universe packages (LP: #1131111)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 244
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 03 Apr 2013 02:02:12 +0000
+
+hud (13.04.0daily13.02.20-0ubuntu2) raring; urgency=low
+
+  * debian/control:
+    - Remove some Build-Depends that aren't in main yet and are used for the
+      test suite.  We'll add tests back very soon as dep8 or without
+      bustle.  This is just a brown-paper-bag release to fix component
+      mismatch.
+  * debian/hud-tools.install:
+    - Don't ship hud-gtk stuff, since that's only built when tests are.
+
+ -- Michael Terry <mterry@ubuntu.com>  Wed, 20 Feb 2013 17:49:47 +0000
+
+hud (13.04.0daily13.02.20-0ubuntu1) raring; urgency=low
+
+  [ Ted Gould ]
+  * First version
+    * Now independent of indicator-appmenu
+
+  [ Michael Terry ]
+  * Switch to dh9
+  * Update copyright to DEP-5
+  * Use valac-0.18 instead of valac-0.16
+  * Require raring's version of bustle for the --count argument
+
+  [ Mathieu Trudel-Lapierre ]
+  * Automatic snapshot from revision 237 (bootstrap).
+  * debian/control:
+    - update Maintainer.
+    - Further flesh out long description for the packages.
+    - Reorganize Build-Depends for clarity.
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 242
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Wed, 20 Feb 2013 02:01:50 +0000
+
+hud (13.04.0-0ubuntu1~ppa17) quantal; urgency=low
+
+  [ Florian Boucault ]
+  * Support for additional field in struct ubuntu_ui_session_lifecycle_observer.
+
+ -- Ricardo Salveti de Araujo <ricardo.salveti@canonical.com>  Wed, 20 Feb 2013 05:47:29 -0300
+
+hud (13.04.0-0ubuntu1~ppa16) quantal; urgency=low
+
+  * Reverse item ordering (LP: #1130050) (LP: #1125656)
+
+ -- Antti Kaijanmäki <antti.kaijanmaki@canonical.com>  Tue, 19 Feb 2013 21:58:39 +0200
+
+hud (13.04.0-0ubuntu1~ppa15) quantal; urgency=low
+
+  * Sidestage support for appstack ordering (LP: #1127653)
+  * Stop crashing on second application start after quit (LP: #1126580)
+  * Usage not getting used in ranking (LP: #1129154) and not tracked
+    for parameterized actions (LP: #1129156)
+  * Fix GMenuModel based indicator actions (LP: #1129170)
+  * Description fixes (LP: #1122171)
+    * Use keywords from menu model for description
+    * Make context look like keywords in description (LP: #1125685)
+    * Show descriptions in results model
+  * Small Coverity fixes
+    * Unchecked return value (LP: #1126462)
+    * Parameter name hidden (LP: #1126448)
+    * Forward NULL (LP: #1126458)
+    * Stray semicolon (LP: #1126459)
+
+ -- Ted Gould <ted@ubuntu.com>  Mon, 18 Feb 2013 10:36:12 -0600
+
+hud (13.04.0-0ubuntu1~ppa14) quantal; urgency=low
+
+  * Bumping version
+
+ -- Ted Gould <ted@ubuntu.com>  Sat, 16 Feb 2013 10:07:38 -0600
+
+hud (13.04.0-0ubuntu1~ppa13) quantal; urgency=low
+
+  * Bumping version
+
+ -- Pete Woods <pete.woods@canonical.com>  Fri, 15 Feb 2013 12:47:58 +0000
+
+hud (13.04.0-0ubuntu1~ppa12) quantal; urgency=low
+
+  * Bumping version
+
+ -- Albert Astals Cid <albert.astals@canonical.com>  Fri, 15 Feb 2013 09:04:51 +0100
+
+hud (13.04.0-0ubuntu1~ppa11) quantal; urgency=low
+
+  * Invoke the correct listening binary and make sure it is correctly killed.
+
+ -- Pete Woods <pete.woods@canonical.com>  Thu, 14 Feb 2013 14:06:27 +0000
+
+hud (13.04.0-0ubuntu1~ppa10) quantal; urgency=low
+
+  * Extract direct interaction with Julius into a command line process
+    - This should isolate us from it misbehaving
+
+ -- Pete Woods <pete.woods@canonical.com>  Wed, 13 Feb 2013 22:37:15 +0000
+
+hud (13.04.0-0ubuntu1~ppa9) quantal; urgency=low
+
+  * Bumping version
+
+ -- Albert Astals Cid <albert.astals@canonical.com>  Wed, 13 Feb 2013 12:25:03 +0100
+
+hud (13.04.0-0ubuntu1~ppa8) quantal; urgency=low
+
+  * Bumping version
+
+ -- Albert Astals Cid <albert.astals@canonical.com>  Tue, 12 Feb 2013 12:20:59 +0100
+
+hud (13.04.0-0ubuntu1~ppa7) quantal; urgency=low
+
+  * Bumping version
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 08 Feb 2013 10:45:09 -0600
+
+hud (13.04.0-0ubuntu1~ppa6) quantal; urgency=low
+
+  * Bumping version
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 07 Feb 2013 21:55:21 -0600
+
+hud (13.04.0-0ubuntu1~ppa5) quantal; urgency=low
+
+  * Bumping version
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 06 Feb 2013 20:46:01 -0600
+
+hud (13.04.0-0ubuntu1~ppa4) quantal; urgency=low
+
+  * Bumping version
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 05 Feb 2013 21:47:15 -0600
+
+hud (13.04.0-0ubuntu1~ppa3) quantal; urgency=low
+
+  * Bumping version
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 29 Jan 2013 21:24:45 +0000
+
+hud (13.04.0-0ubuntu1~ppa2) quantal; urgency=low
+
+  * Upstream Merge
+    * Adding a stub library
+  * debian/control: Adding libhud and libhud-dev packages
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 09 Nov 2012 10:44:47 -0600
+
+hud (13.04.0-0ubuntu1~ppa1) quantal; urgency=low
+
+  [ Ted Gould ]
+  * First version
+    * Now independent of indicator-appmenu
+
+  [ Michael Terry ]
+  * Switch to dh9
+  * Update copyright to DEP-5
+  * Use valac-0.18 instead of valac-0.16
+  * Require raring's version of bustle for the --count argument
+
+  [ Mathieu Trudel-Lapierre ]
+  * Automatic snapshot from revision 237 (bootstrap).
+  * debian/control:
+    - update Maintainer.
+    - Further flesh out long description for the packages.
+    - Reorganize Build-Depends for clarity.
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 24 Oct 2012 15:43:27 +0200
+

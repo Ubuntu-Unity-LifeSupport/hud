@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node name="/">
+	<interface name="com.canonical.hud.query">
+<!-- Properties -->
+		<property name="ResultsModel" type="s" access="read" />
+		<property name="AppstackModel" type="s" access="read" />
+		<!-- Note, this is read only, to update use the update function so
+		     that you get the model revision to ensure you've got the data -->
+		<property name="CurrentQuery" type="s" access="read" />
+		<property name="ToolbarItems" type="as" access="read" />
+
+<!-- Functions -->
+		<method name="UpdateQuery">
+			<!-- in -->
+			<arg type="s" name="query" direction="in" />
+			<!-- out -->
+			<arg type="i" name="modelRevision" direction="out" />
+		</method>
+		
+		<method name="VoiceQuery">
+			<!-- out -->
+			<arg type="i" name="modelRevision" direction="out" />
+			<arg type="s" name="query" direction="out" />
+		</method>
+
+		<method name="UpdateApp">
+			<!-- in -->
+			<arg type="s" name="app" direction="in" />
+			<!-- out -->
+			<arg type="i" name="modelRevision" direction="out" />
+		</method>
+
+		<method name="CloseQuery">
+		</method>
+
+		<method name="ExecuteCommand">
+			<!-- in -->
+			<arg type="v" name="item" direction="in" />
+			<arg type="u" name="timestamp" direction="in" />
+		</method>
+
+		<method name="ExecuteParameterized">
+			<!-- in -->
+			<arg type="v" name="item" direction="in" />
+			<arg type="u" name="timestamp" direction="in" />
+			<!-- out -->
+			<arg type="s" name="busName" direction="out" />
+			<arg type="s" name="prefix" direction="out" />
+			<arg type="s" name="baseAction" direction="out" />
+			<arg type="o" name="actionPath" direction="out" />
+			<arg type="o" name="modelPath" direction="out" />
+			<arg type="i" name="modelSection" direction="out" />
+		</method>
+
+		<method name="ExecuteToolbar">
+			<!-- in -->
+			<arg type="s" name="item" direction="in" />
+			<arg type="u" name="timestamp" direction="in" />
+		</method>
+
+<!-- Signals -->
+		<!-- Most update signals come through the Dee model -->
+
+		<signal name="VoiceQueryLoading">
+		</signal>
+
+		<signal name="VoiceQueryListening">
+		</signal>
+		
+		<signal name="VoiceQueryHeardSomething">
+		</signal>
+
+<!-- End of interesting stuff -->
+
+	</interface>
+</node>

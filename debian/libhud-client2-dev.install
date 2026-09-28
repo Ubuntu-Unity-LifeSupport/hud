@@ -1,0 +1,5 @@
+debian/tmp/usr/include/libhud-client-2/*
+debian/tmp/usr/lib/*/libhud-client.so
+debian/tmp/usr/lib/*/pkgconfig/hud-client-2.pc
+debian/tmp/usr/share/gir-1.0/HudClient-2.gir
+debian/tmp/usr/share/vala/vapi/HudClient-2.vapi

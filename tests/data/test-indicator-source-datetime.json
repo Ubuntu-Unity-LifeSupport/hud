@@ -1,0 +1,17 @@
+{
+  "id": 0,
+  "submenu": [
+      {
+        "id": 1,
+        "label": 'Date Time'
+      },
+      {
+        "id": 2,
+        "label": 'foo'
+      },
+      {
+        "id": 3,
+        "label": 'zzz'
+      }
+  ]
+}

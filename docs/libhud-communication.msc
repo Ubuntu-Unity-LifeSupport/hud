@@ -1,0 +1,18 @@
+msc {
+	app [label="Application"], libhud [label="libHUD"], hud [label="HUD Service"];
+
+	app => libhud [label="Initialize"];
+	libhud => hud [label="Register Application"];
+	hud >> libhud [label="Application Object Path"];
+
+	---;
+
+	app box app [label="Put actions on DBus"];
+	app => libhud [label="Register actions with HUD"];
+	app => libhud [label="Add descriptions"];
+	libhud => hud [label="Add to application"];
+
+	hud -> app [label="Introspect Actions"];
+	hud -> app [label="Introspect Descriptions"];
+
+}

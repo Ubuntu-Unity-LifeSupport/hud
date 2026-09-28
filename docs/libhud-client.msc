@@ -1,0 +1,20 @@
+msc {
+	shell [label="Unity"], client [label="libhud-client"], hud [label="HUD Service"];
+
+	shell => client [label="query_new"];
+	client => hud [label="CreateQuery"];
+	client >> shell [label="Query Object"];
+	hud >> client [label="Query Path"];
+	client => hud [label="Build Proxy"];
+	hud -> client [label="Update Models"];
+	client -> shell [label="Models Ready"];
+	
+
+	---;
+
+	shell box shell [label="Update Query"];
+	shell => client [label="Change Query"];
+	client => hud [label="Change Query"];
+	hud -> shell [label="Update Models"];
+
+}

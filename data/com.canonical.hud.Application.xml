@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node name="/">
+	<interface name="com.canonical.hud.Application">
+<!-- Properties -->
+		<property name="ActionGroups" type="a(vso)" access="read">
+			<annotation name="org.qtproject.QtDBus.QtTypeName" value="QList&lt;hud::common::ActionGroup&gt;"/>
+		</property>
+		<property name="MenuModels" type="a(vo)" access="read">
+			<annotation name="org.qtproject.QtDBus.QtTypeName" value="QList&lt;hud::common::MenuModel&gt;"/>
+		</property>
+		<property name="DesktopPath" type="s" access="read" />
+		<property name="Icon" type="s" access="read" />
+
+<!-- Functions -->
+		<method name="AddSources">
+			<annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QList&lt;hud::common::Action&gt;"/>
+			<arg type="a(usso)" name="actions" direction="in" />
+			<annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QList&lt;hud::common::Description&gt;"/>
+			<arg type="a(uso)"  name="descriptions" direction="in" />
+		</method>
+		<method name="SetWindowContext">
+			<arg type="u" name="window" direction="in" />
+			<arg type="s" name="context" direction="in" />
+		</method>
+
+<!-- Signals -->
+		<!-- None -->
+
+	</interface>
+</node>

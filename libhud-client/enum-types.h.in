@@ -1,0 +1,64 @@
+/*** BEGIN file-header ***/
+/*
+ * Copyright © 2013 Canonical Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranties of
+ * MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Author: Ted Gould <ted@canonical.com>
+ */
+
+#if !defined (_HUD_CLIENT_H_INSIDE) && !defined (HUD_CLIENT_COMPILATION)
+#error "Only <hud-client.h> can be included directly."
+#endif
+
+#ifndef __HUD_CLIENT_ENUM_TYPES_H__
+#define __HUD_CLIENT_ENUM_TYPES_H__
+
+#pragma GCC visibility push(default)
+
+#include <glib-object.h>
+
+G_BEGIN_DECLS
+
+/*** END file-header ***/
+
+/*** BEGIN file-tail ***/
+
+G_END_DECLS
+
+#pragma GCC visibility pop
+
+#endif /* __HUD_CLIENT_ENUM_TYPES_H__ */
+/*** END file-tail ***/
+
+/*** BEGIN file-production ***/
+/* Enumerations from file: "@basename@" */
+#include <libhud-client/@basename@>
+
+/*** END file-production ***/
+
+/*** BEGIN value-header ***/
+
+GType @enum_name@_get_type (void) G_GNUC_CONST;
+const gchar * @enum_name@_get_nick (@EnumName@ value) G_GNUC_CONST;
+@EnumName@ @enum_name@_get_value_from_nick (const gchar * nick) G_GNUC_CONST;
+
+/**
+	HUD_CLIENT_TYPE_@ENUMSHORT@:
+
+	Gets the #GType value for the type associated with the
+	#@EnumName@ enumerated type.
+*/
+#define HUD_CLIENT_TYPE_@ENUMSHORT@ (@enum_name@_get_type())
+
+/*** END value-header ***/

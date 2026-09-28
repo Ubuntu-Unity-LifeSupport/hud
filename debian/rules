@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+
+export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
+export G_MESSAGES_DEBUG=all
+export DEBIAN_TARGET_DIR="${CURDIR}/debian/tmp"
+
+ifneq (,$(filter $(DEB_HOST_ARCH),ppc64el armhf arm64))
+	ENABLE_BAMF = OFF
+else
+	ENABLE_BAMF = ON
+	ENABLE_DOCUMENTATION = OFF
+endif
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- -DDEBIAN_TARGET_DIR="${DEBIAN_TARGET_DIR}" -DENABLE_DOCUMENTATION=ON -DENABLE_BAMF=$(ENABLE_BAMF) -DENABLE_DOCUMENTATION=$(ENABLE_DOCUMENTATION)
+
+override_dh_install:
+	dh_install --fail-missing

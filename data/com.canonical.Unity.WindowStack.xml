@@ -1,0 +1,42 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="com.canonical.Unity.WindowStack">
+    <signal name="FocusedWindowChanged">
+      <arg name="window_id" type="u" direction="out"/>
+      <arg name="app_id" type="s" direction="out"/>
+      <arg name="stage" type="u" direction="out"/>
+	  <!-- 0, main; 1, side; 2, windowed -->
+    </signal>
+    <signal name="WindowCreated">
+      <arg name="window_id" type="u" direction="out"/>
+      <arg name="app_id" type="s" direction="out"/>
+    </signal>
+    <signal name="WindowDestroyed">
+      <arg name="window_id" type="u" direction="out"/>
+      <arg name="app_id" type="s" direction="out"/>
+    </signal>
+    <method name="GetWindowProperties">
+      <arg name="values" type="as" direction="out"/>
+      <arg name="window_id" type="u" direction="in"/>
+      <arg name="app_id" type="s" direction="in"/>
+      <arg name="property_names" type="as" direction="in"/>
+    </method>
+    <method name="GetWindowBusAddress">
+      <arg name="address_path" type="as" direction="out"/>
+      <arg name="window_id" type="u" direction="in"/>
+    </method>
+    <method name="GetAppIdFromPid">
+      <arg name="app_id" type="s" direction="out"/>
+      <arg name="pid" type="u" direction="in"/>
+    </method>
+    <method name="GetWindowStack">
+      <arg type="a(usbu)" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="hud::common::WindowInfoList"/>
+	  <!-- a(window_id, app_id, focused, stage) -->
+	  <!-- Order of the array will be in "stacking order" with the first
+	    item being the entry on the top of the stack.  Stages will be interleaved
+		with the entries being in order for that stage. -->
+    </method>
+  </interface>
+</node>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<keywordMapping>
+	<mapping original="Open _Terminal">
+		<keyword name="New Terminal"/>
+		<keyword name=""/>
+		<keyword name="Another Terminal"/>
+	</mapping>
+	<mapping original="Open Ta_b">
+		<keyword name="New Tab"/>
+		<keyword name="Another Tab"/>
+	</mapping>
+</keywordMapping>

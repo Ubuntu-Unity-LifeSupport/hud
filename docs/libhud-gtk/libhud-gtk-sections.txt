@@ -1,0 +1,17 @@
+<SECTION>
+<FILE>manager</FILE>
+<TITLE>HudGtkManager</TITLE>
+HudGtkManagerClass
+hud_gtk_manager_get_publisher
+hud_gtk_manager_new
+<SUBSECTION Standard>
+HUD_GTK_IS_MANAGER
+HUD_GTK_IS_MANAGER_CLASS
+HUD_GTK_MANAGER
+HUD_GTK_MANAGER_CLASS
+HUD_GTK_MANAGER_GET_CLASS
+HUD_GTK_TYPE_MANAGER
+HudGtkManagerPrivate
+hud_gtk_manager_get_type
+</SECTION>
+

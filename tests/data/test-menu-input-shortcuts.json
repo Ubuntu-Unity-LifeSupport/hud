@@ -1,0 +1,16 @@
+{"submenu": [
+	{"id": 1,
+	 "label": "Save",
+	 "shortcut": [["Control", "S"]]},
+	{"id": 2,
+	 "label": "Quiter",
+	 "shortcut": [["Control", "Alt", "Q"]]},
+	{"id": 3,
+	 "label": "Emacs",
+	 "shortcut": [["Control", "X"], ["Control", "W"]]},
+	{"id": 4,
+	 "label": "Close",
+	 "shortcut": [["Super", "W"]]},
+	{"id": 5,
+	 "label": "Nothing"}
+]}

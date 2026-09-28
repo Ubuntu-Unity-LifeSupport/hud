@@ -1,0 +1,71 @@
+libhud-client.so.2 libhud-client2 #MINVER#
+ (c++)"hud::client::HudClient::qt_metacall(QMetaObject::Call, int, void**)@Base" 13.10.1
+ (c++)"hud::client::HudClient::qt_metacast(char const*)@Base" 13.10.1
+ (c++)"hud::client::HudClient::modelsChanged()@Base" 13.10.1
+ (c++)"hud::client::HudClient::executeCommand(int)@Base" 13.10.1
+ (c++)"hud::client::HudClient::setAppstackApp(QString const&)@Base" 13.10.1
+ (c++)"hud::client::HudClient::commandExecuted()@Base" 13.10.1
+ (c++)"hud::client::HudClient::startVoiceQuery()@Base" 13.10.1
+ (c++)"hud::client::HudClient::staticMetaObject@Base" 13.10.1
+ (c++)"hud::client::HudClient::voiceQueryFailed()@Base" 13.10.1
+ (c++)"hud::client::HudClient::voiceQueryLoading()@Base" 13.10.1
+ (c++)"hud::client::HudClient::voiceQueryFinished(QString const&)@Base" 13.10.1
+ (c++)"hud::client::HudClient::voiceQueryListening()@Base" 13.10.1
+ (c++)"hud::client::HudClient::executeToolBarAction(HudClientQueryToolbarItems)@Base" 13.10.1
+ (c++)"hud::client::HudClient::showParametrizedAction(QString const&, QVariant const&)@Base" 13.10.1
+ (c++)"hud::client::HudClient::cancelParametrizedAction()@Base" 13.10.1
+ (c++)"hud::client::HudClient::updateParametrizedAction(QVariant const&)@Base" 13.10.1
+ (c++)"hud::client::HudClient::voiceQueryHeardSomething()@Base" 13.10.1
+ (c++)"hud::client::HudClient::executeParametrizedAction(QVariant const&)@Base" 13.10.1
+ (c++)"hud::client::HudClient::setQuery(QString const&)@Base" 13.10.1
+ (c++)"hud::client::HudClient::HudClient()@Base" 13.10.1
+ (c++)"hud::client::HudClient::HudClient()@Base" 13.10.1
+ (c++)"hud::client::HudClient::~HudClient()@Base" 13.10.1
+ (c++)"hud::client::HudClient::~HudClient()@Base" 13.10.1
+ (c++)"hud::client::HudClient::~HudClient()@Base" 13.10.1
+ (c++)"hud::client::HudClient::metaObject() const@Base" 13.10.1
+ (c++)"hud::client::HudClient::toolBarModel() const@Base" 13.10.1
+ (c++)"hud::client::HudClient::results() const@Base" 13.10.1
+ (c++)"hud::client::HudClient::appstack() const@Base" 13.10.1
+ (c++)"typeinfo for hud::client::HudClient@Base" 13.10.1
+ (c++)"typeinfo name for hud::client::HudClient@Base" 13.10.1
+ (c++)"vtable for hud::client::HudClient@Base" 13.10.1
+ hud_client_connection_connected@Base 13.04.0-0ubuntu1~ppa7
+ hud_client_connection_get_address@Base 13.04.0
+ hud_client_connection_get_ref@Base 13.04.0
+ hud_client_connection_get_type@Base 13.04.0
+ hud_client_connection_new@Base 13.04.0
+ hud_client_connection_new_query@Base 13.04.0
+ hud_client_param_get_actions@Base 13.04.0-0ubuntu1~ppa3
+ hud_client_param_get_model@Base 13.04.0-0ubuntu1~ppa3
+ hud_client_param_get_type@Base 13.04.0-0ubuntu1~ppa3
+ hud_client_param_new@Base 13.04.0-0ubuntu1~ppa3
+ hud_client_param_send_cancel@Base 13.04.0-0ubuntu1~ppa3
+ hud_client_param_send_commit@Base 13.04.0-0ubuntu1~ppa6
+ hud_client_param_send_reset@Base 13.04.0-0ubuntu1~ppa3
+ hud_client_query_appstack_get_app_icon@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_appstack_get_app_id@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_execute_command@Base 13.04.0
+ hud_client_query_get_appstack_model@Base 13.04.0
+ hud_client_query_execute_param_command@Base 13.04.0-0ubuntu1~ppa3
+ hud_client_query_execute_toolbar_item@Base 13.04.0-0ubuntu1~ppa7
+ hud_client_query_get_active_toolbar@Base 13.04.0-0ubuntu1~ppa7
+ hud_client_query_get_query@Base 13.04.0
+ hud_client_query_get_results_model@Base 13.04.0
+ hud_client_query_get_type@Base 13.04.0
+ hud_client_query_new@Base 13.04.0
+ hud_client_query_new_for_connection@Base 13.04.0
+ hud_client_query_results_get_command_highlights@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_results_get_command_id@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_results_get_command_name@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_results_get_description@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_results_get_description_highlights@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_results_get_shortcut@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_results_is_parameterized@Base 13.10.0-0ubuntu1~ppa2
+ hud_client_query_set_appstack_app@Base 13.04.0-0ubuntu1~ppa2
+ hud_client_query_set_query@Base 13.04.0
+ hud_client_query_toolbar_item_active@Base 13.04.0-0ubuntu1~ppa7
+ hud_client_query_toolbar_items_get_nick@Base 13.04.0-0ubuntu1~ppa7
+ hud_client_query_toolbar_items_get_type@Base 13.04.0-0ubuntu1~ppa7
+ hud_client_query_toolbar_items_get_value_from_nick@Base 13.04.0-0ubuntu1~ppa7
+ hud_client_query_voice_query@Base 13.04.0

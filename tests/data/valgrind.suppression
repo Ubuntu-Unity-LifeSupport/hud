@@ -1,0 +1,465 @@
+
+{
+   Google test internals
+   Memcheck:Leak
+   ...
+   fun:*_ZN7testing8internal*
+   ...
+}
+
+##############################
+# Valgrind doesn't like dlopen
+##############################
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   ...
+   fun:dlopen*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:g_malloc0
+   ...
+   fun:_dl_init
+   ...
+}
+
+###############################
+# Qt's usage of GLib
+###############################
+
+{
+   Ignore pthreads
+   Memcheck:Leak
+   ...
+   fun:pthread_create@@*
+}
+
+{
+   Glib memalign
+   Memcheck:Leak
+   ...
+   fun:posix_memalign
+}
+
+{
+   Ignore glib mainloop
+   Memcheck:Leak
+   ...
+   fun:g_main_context_push_thread_default
+}
+
+{
+   Ignore glib main context
+   Memcheck:Leak
+   ...
+   fun:g_main_context_new
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:_ZN19QApplicationPrivate9constructEv
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:_ZN19QApplicationPrivate9constructEv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:_ZN22QGuiApplicationPrivate25createPlatformIntegrationEv
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   ...
+   obj:/usr/lib/*/libpango-*.so.*
+   fun:pango_layout_get_unknown_glyphs_count
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   ...
+   fun:pango_itemize_with_base_dir
+   obj:/usr/lib/*/libpango-*.so.*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   obj:/usr/lib/*/libQt5Widgets.so.*
+   fun:_ZN13QStyleFactory6createERK7QString
+   fun:_ZN12QApplication5styleEv
+}
+
+##########################
+# Fontconfig
+##########################
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:FcValueSave
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   obj:/usr/lib/*/libfontconfig.so.*
+   ...
+   fun:FcConfigParseAndLoad
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib/*/libfontconfig.so.*
+   ...
+   fun:FcConfigSubstituteWithPat
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   ...
+   obj:/usr/lib/*/libfontconfig.so.*
+   ...
+   fun:FcPatternAddInteger
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   ...
+   obj:/usr/lib/*/libfontconfig.so.*
+   ...
+   fun:FcFontRenderPrepare
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   ...
+   obj:/usr/lib/*/libfontconfig.so.*
+   ...
+   fun:FcPatternAddBool
+   ...
+}
+
+##############################
+# Dee
+##############################
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   ...
+   obj:/usr/lib/*/libdee-1.0.so.*
+   ...
+   fun:g_simple_async_result_complete
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   fun:g_strdup
+   fun:dee_serializable_register_parser
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   ...
+   obj:/usr/lib/*/libdee-1.0.so.*
+   ...
+   fun:g_simple_async_result_complete
+   ...
+   fun:g_main_context_*
+   ...
+}
+
+###############################
+# Pango
+###############################
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:g_malloc0
+   fun:pango_language_from_string
+   fun:pango_script_get_sample_language
+   ...
+}
+
+
+###############################
+# GObject rules
+###############################
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:g_type_register_static
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:g_type_register_fundamental
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:type_node_fundamental_new_W
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:type_data_make_W
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:g_type_add_interface_static
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:type_iface_vtable_base_init_Wm
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:g_dbus_interface_skeleton_class_intern_init
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:g_signal_type_cclosure_new
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   ...
+   fun:g_type_class_ref
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:g_malloc0
+   fun:g_closure_new_simple
+   fun:g_cclosure_new
+   fun:g_signal_connect_data
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:g_malloc0
+   fun:g_closure_new_simple
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:g_malloc0
+   fun:g_closure_new_simple
+   fun:g_cclosure_new_swap
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:realloc
+   fun:g_realloc
+   ...
+   fun:g_closure_add_invalidate_notifier
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   ...
+   fun:g_type_create_instance
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:g_malloc
+   ...
+   fun:g_type_add_interface_dynamic
+   fun:g_type_module_add_interface
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:g_malloc
+   ...
+   fun:g_type_register_dynamic
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite,possible
+   fun:malloc
+   fun:g_malloc
+   ...
+   fun:g_type_class_ref
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:g_malloc*
+   ...
+   fun:g_type_create_instance
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:realloc
+   fun:g_realloc
+   ...
+   fun:g_closure_add_invalidate_notifier
+   fun:g_source_set_closure
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   fun:g_strconcat
+   fun:g_application_constructed
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   fun:g_slice_alloc
+   ...
+   fun:g_main_context_dispatch
+   ...
+   fun:g_main_loop_run
+   ...
+   fun:start_thread
+   fun:clone
+}
+
+###################
+# GTK
+###################
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:g_utf8_offset_to_pointer
+   ...
+   obj:/usr/lib/*/libgtk-x11-*
+   ...
+}
+

@@ -1,0 +1,7 @@
+[Unit]
+Description=Window Stack Bridge
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=@pkglibexecdir@/window-stack-bridge
+Restart=on-failure

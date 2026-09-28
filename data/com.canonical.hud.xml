@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node name="/">
+	<interface name="com.canonical.hud">
+<!-- Properties -->
+		<property name="OpenQueries" type="ao" access="read" />
+		
+		<property name="Applications" type="a(so)" access="read">
+			<annotation name="org.qtproject.QtDBus.QtTypeName" value="QList&lt;hud::common::NameObject&gt;"/>
+		</property>
+
+<!-- Functions -->
+		<method name="CreateQuery">
+			<!-- in -->
+			<arg type="s" name="query" direction="in" />
+			<!-- out -->
+			<arg type="o" name="queryObject" direction="out" />
+			<arg type="s" name="resultsName" direction="out" />
+			<arg type="s" name="appstackName" direction="out" />
+			<arg type="i" name="modelRevision" direction="out" />
+		</method>
+
+		<method name="RegisterApplication">
+			<!-- NOTE: If the application is already registered it won't return
+			     an error, just the object path for that application -->
+			<!-- in -->
+			<arg type="s" name="id" direction="in" />
+			<!-- out -->
+			<arg type="o" name="appObject" direction="out" />
+		</method>
+
+<!-- Legacy Query Interface, will be deprecated -->
+		<method name="StartQuery">
+			<!-- in -->
+			<arg type="s" name="query" direction="in" />
+			<arg type="i" name="entries" direction="in" />
+			<!-- out -->
+			<arg type="s" name="target" direction="out" />
+			<annotation name="org.qtproject.QtDBus.QtTypeName.Out1" value="QList&lt;hud::common::Suggestion&gt;"/>
+			<arg type="a(sssssv)" name="suggestions" direction="out" />
+			<arg type="v" name="querykey" direction="out" />
+		</method>
+
+		<method name="ExecuteQuery">
+			<arg type="v" name="key" direction="in" />
+			<arg type="u" name="timestamp" direction="in" />
+		</method>
+
+		<method name="CloseQuery">
+			<arg type="v" name="querykey" direction="in" />
+		</method>
+
+<!-- Legacy Signals -->
+		<signal name="UpdatedQuery">
+			<arg type="s" name="target" direction="out" />
+			<annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QList&lt;hud::common::Suggestion&gt;"/>
+			<arg type="a(sssssv)" name="suggestions" direction="out" />
+			<arg type="v" name="querykey" direction="out" />
+		</signal>
+
+<!-- End of interesting stuff -->
+
+	</interface>
+</node>
