@@ -1,3 +1,16 @@
+hud (14.10+17.10.20170619-0ubuntu6+unity2) resolute; urgency=medium
+
+  * window-stack-bridge: keep a window whose application disappears while
+    it is being looked up. bamf re-matches a window to another application
+    when its class changes, as LibreOffice's does after mapping; the
+    DesktopFile() error on the closed temporary application dropped the
+    window for good, and the HUD was empty for it (about a quarter of
+    LibreOffice Writer starts). The window now gets its id as application
+    id, as for an application without a desktop file. Unit tests in
+    TestBamfWindowStack.
+
+ -- NeiroNext <mihail.rozshko@gmail.com>  Mon, 28 Sep 2026 22:57:13 +0000
+
 hud (14.10+17.10.20170619-0ubuntu6+unity1) resolute; urgency=medium
 
   * CMakeLists.txt, cmake/*.cmake: require CMake 3.10. CMake 4 removed
