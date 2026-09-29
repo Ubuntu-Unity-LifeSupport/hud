@@ -6,7 +6,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${GMOCK_INCLUDE_DIRS})
 include_directories(${GTEST_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+# resolute's googletest needs C++17; the rest of hud stays on C++14.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17")
 
 add_definitions(-DHUD_SERVICE_BINARY="${CMAKE_BINARY_DIR}/service/hud-service")
 
