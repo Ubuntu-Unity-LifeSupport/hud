@@ -1,3 +1,11 @@
+hud (14.10+17.10.20170619-0ubuntu6+unity3) resolute; urgency=medium
+
+  * CMakeLists.txt, tests/CMakeLists.txt: build hud itself with C++14 again,
+    as 0ubuntu6 did, and only the tests with C++17. +unity1 had raised the
+    whole project to C++17, while only resolute's googletest needed it.
+
+ -- NeiroNext <mihail.rozshko@gmail.com>  Tue, 29 Sep 2026 00:32:08 +0000
+
 hud (14.10+17.10.20170619-0ubuntu6+unity2) resolute; urgency=medium
 
   * window-stack-bridge: keep a window whose application disappears while
