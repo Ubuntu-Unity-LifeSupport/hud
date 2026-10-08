@@ -652,6 +652,36 @@ TEST_F(TestBamfWindowStack, MovedWindowKeepsNewIdInLaterSignals) {
 	EXPECT_EQ(QVariantList() << uint(1) << "appid-1", windowDestroyedSpy.at(0));
 }
 
+// The other side of the race: bamf moves the window between the bridge's
+// Parents() and DesktopFile() calls, so the first application is gone when
+// it is asked; the bridge announces the window number, and the WindowAdded of
+// the move, handled afterwards, corrects it.
+TEST_F(TestBamfWindowStack, WindowOpenedDuringMoveIsCorrected) {
+	createApplication(0);
+	createApplication(1);
+	createWindow(0, 0);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	QStringList log;
+	recordSignals(windowStack, log);
+	QSignalSpy windowDestroyedSpy(&windowStack,
+	SIGNAL(WindowDestroyed(uint, const QString &)));
+	QSignalSpy windowChangedSpy(&windowStack,
+	SIGNAL(FocusedWindowChanged(uint, const QString &, uint)));
+
+	createWindow(5, 9); // application 9 is never exported: gone when asked
+	qDebug() << "EXPECTED ERROR BELOW";
+	windowOpened(windowPath(0), windowPath(5));
+	windowChangedSpy.wait();
+	qDebug() << "EXPECTED ERROR ABOVE";
+	moveWindow(5, 1);
+	windowDestroyedSpy.wait();
+	EXPECT_EQ(QStringList() << "created 5 5" << "focused 5 5 0"
+			<< "created 5 appid-1" << "focused 5 appid-1 0"
+			<< "destroyed 5 5", log);
+}
+
 // ActiveWindowChanged to a window the bridge does not know reports nothing,
 // so hud-service keeps the window it had focused, and so does the bridge.
 TEST_F(TestBamfWindowStack, FocusKeptOverUnknownActiveWindow) {
