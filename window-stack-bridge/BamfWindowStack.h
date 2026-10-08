@@ -28,6 +28,12 @@
 
 class Q_DECL_EXPORT BamfWindow {
 public:
+	// What resolveApplicationId found out: an error (Parents() or the
+	// parent's DesktopFile() failed), no parent, or an application id
+	enum class Resolved {
+		PARENTS_ERROR, DESKTOP_FILE_ERROR, NO_PARENT, ID
+	};
+
 	explicit BamfWindow(const QString &path, const QDBusConnection &connection);
 
 	virtual ~BamfWindow();
@@ -39,6 +45,12 @@ public:
 	QString path() const;
 
 	const QString & applicationId();
+
+	void setApplicationId(const QString &applicationId);
+
+	// Ask bamf for the application the window is under now: on ID, id is its
+	// desktop file's base name, or the window id when it has none
+	Resolved resolveApplicationId(QString &id);
 
 	const QString xProp(const QString &property);
 
@@ -84,6 +96,8 @@ protected Q_SLOTS:
 
 	void ViewOpened(const QString &path, const QString &type);
 
+	void WindowAdded(const QString &path);
+
 	WindowPtr addWindow(const QString& path);
 
 	WindowPtr removeWindow(const QString& path);
@@ -94,6 +108,9 @@ protected:
 	QMap<QString, WindowPtr> m_windows;
 
 	QMap<unsigned int, WindowPtr> m_windowsById;
+
+	// The window the bridge last reported as focused
+	QString m_activeWindowPath;
 };
 
 #endif /* BAMFWINDOWSTACK_H_ */

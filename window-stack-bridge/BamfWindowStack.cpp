@@ -41,42 +41,50 @@ BamfWindow::BamfWindow(const QString &path, const QDBusConnection &connection) :
 		m_windowId = windowIdReply;
 	}
 
-	QStringList parents;
+	Resolved resolved(resolveApplicationId(m_applicationId));
+	if (resolved == Resolved::PARENTS_ERROR) {
+		m_error = true;
+		return;
+	}
+
+	// bamf can re-match a window to another application between our Parents()
+	// and DesktopFile() calls, and the application we asked about is gone.
+	// Keep the window with the window id as application id, as for an
+	// application without a desktop file; BamfWindowStack::WindowAdded
+	// corrects it when bamf announces the window under its application.
+	if (resolved != Resolved::ID) {
+		m_applicationId = QString::number(m_windowId);
+	}
+}
+
+BamfWindow::Resolved BamfWindow::resolveApplicationId(QString &id) {
 	QDBusPendingReply<QStringList> parentsReply(m_view.Parents());
 	parentsReply.waitForFinished();
 	if (parentsReply.isError()) {
-		qWarning() << _("Error getting parents for") << path
+		qWarning() << _("Error getting parents for") << path()
 				<< parentsReply.error();
-		m_error = true;
-		return;
-	} else {
-		parents = parentsReply;
+		return Resolved::PARENTS_ERROR;
 	}
 
-	if (!parents.empty()) {
-		OrgAyatanaBamfApplicationInterface application(
-				DBusTypes::BAMF_DBUS_NAME, parents.first(),
-				m_window.connection());
-		QDBusPendingReply<QString> desktopFileReply(application.DesktopFile());
-		desktopFileReply.waitForFinished();
-		if (desktopFileReply.isError()) {
-			// bamf can re-match a window to another application between our
-			// Parents() and DesktopFile() calls, and the application we asked
-			// about is gone. Keep the window with the window id as application
-			// id, as for an application without a desktop file.
-			qWarning() << _("Could not get desktop file for") << path
-					<< desktopFileReply.error();
-		} else {
-			QString desktopFile(desktopFileReply);
-			if (!desktopFile.isEmpty()) {
-				m_applicationId = QFileInfo(desktopFile).baseName();
-			}
-		}
+	QStringList parents(parentsReply);
+	if (parents.empty()) {
+		return Resolved::NO_PARENT;
 	}
 
-	if (m_applicationId.isEmpty()) {
-		m_applicationId = QString::number(m_windowId);
+	OrgAyatanaBamfApplicationInterface application(DBusTypes::BAMF_DBUS_NAME,
+			parents.first(), m_window.connection());
+	QDBusPendingReply<QString> desktopFileReply(application.DesktopFile());
+	desktopFileReply.waitForFinished();
+	if (desktopFileReply.isError()) {
+		qWarning() << _("Could not get desktop file for") << path()
+				<< desktopFileReply.error();
+		return Resolved::DESKTOP_FILE_ERROR;
 	}
+
+	QString desktopFile(desktopFileReply);
+	id = desktopFile.isEmpty() ?
+			QString::number(m_windowId) : QFileInfo(desktopFile).baseName();
+	return Resolved::ID;
 }
 
 BamfWindow::~BamfWindow() {
@@ -98,6 +106,10 @@ QString BamfWindow::path() const
 
 const QString & BamfWindow::applicationId() {
 	return m_applicationId;
+}
+
+void BamfWindow::setApplicationId(const QString &applicationId) {
+	m_applicationId = applicationId;
 }
 
 bool BamfWindow::isError() const {
@@ -159,6 +171,14 @@ BamfWindowStack::BamfWindowStack(const QDBusConnection &connection,
 	SIGNAL(ViewOpened(const QString&, const QString&)), this,
 	SLOT(ViewOpened(const QString&, const QString&)));
 
+	// bamf moves a window to another application (LibreOffice changes its
+	// window class after mapping) without a ViewOpened or ViewClosed for the
+	// window; the application it moves to sends WindowAdded. Connected before
+	// WindowPaths(), so no move after that reply is missed
+	m_connection.connect(DBusTypes::BAMF_DBUS_NAME, QString(),
+			"org.ayatana.bamf.application", "WindowAdded", this,
+			SLOT(WindowAdded(const QString&)));
+
 	QDBusPendingReply<QStringList> windowPathsReply(m_matcher.WindowPaths());
 	windowPathsReply.waitForFinished();
 
@@ -171,6 +191,14 @@ BamfWindowStack::BamfWindowStack(const QDBusConnection &connection,
 		for (const QString &path : windowPaths) {
 			addWindow(path);
 		}
+	}
+
+	// hud-service takes the focused window from GetWindowStack, which marks
+	// bamf's active window
+	QDBusPendingReply<QString> activeWindowReply(m_matcher.ActiveWindow());
+	activeWindowReply.waitForFinished();
+	if (!activeWindowReply.isError() && m_windows.value(activeWindowReply)) {
+		m_activeWindowPath = activeWindowReply;
 	}
 }
 
@@ -214,13 +242,14 @@ WindowInfoList BamfWindowStack::GetWindowStack() {
 		return results;
 	}
 
-	const auto window(m_windows[activeWindowReply]);
+	const auto window(m_windows.value(activeWindowReply));
 	if (window) {
 		const uint windowId(window->windowId());
 
 		for (WindowInfo &windowInfo : results) {
 			if (windowInfo.window_id == windowId) {
 				windowInfo.focused = true;
+				m_activeWindowPath = activeWindowReply;
 			}
 		}
 	}
@@ -264,8 +293,9 @@ void BamfWindowStack::ActiveWindowChanged(const QString &oldWindowPath,
 		const QString &newWindowPath) {
 	Q_UNUSED(oldWindowPath);
 	if (!newWindowPath.isEmpty()) {
-		const auto window(m_windows[newWindowPath]);
+		const auto window(m_windows.value(newWindowPath));
 		if (window) {
+			m_activeWindowPath = newWindowPath;
 			FocusedWindowChanged(window->windowId(), window->applicationId(),
 					WindowInfo::MAIN);
 		}
@@ -274,11 +304,45 @@ void BamfWindowStack::ActiveWindowChanged(const QString &oldWindowPath,
 
 void BamfWindowStack::ViewClosed(const QString &path, const QString &type) {
 	if (type == "window") {
+		if (path == m_activeWindowPath) {
+			m_activeWindowPath.clear();
+		}
 		WindowPtr window(removeWindow(path));
 		if (!window.isNull()) {
 			WindowDestroyed(window->windowId(), window->applicationId());
 		}
 	}
+}
+
+void BamfWindowStack::WindowAdded(const QString &path) {
+	// The window is now under the application that sent this. Ask bamf again
+	// rather than trusting the sender: signals queued during a move arrive
+	// after it. Keep the id when bamf gives no answer (no parent while the
+	// window moves or closes, an error); a move always ends with a
+	// WindowAdded from the final application
+	const auto window(m_windows.value(path));
+	if (!window) {
+		return;
+	}
+
+	QString applicationId;
+	if (window->resolveApplicationId(applicationId) != BamfWindow::Resolved::ID
+			|| applicationId == window->applicationId()) {
+		return;
+	}
+
+	// hud-service keys windows by application id: announce the window under
+	// the new id first, give it the focus if hud-service has it focused, and
+	// only then remove it from the old application. Removing first would
+	// empty the focused application and leave hud-service with no focus
+	const QString oldApplicationId(window->applicationId());
+	window->setApplicationId(applicationId);
+	WindowCreated(window->windowId(), applicationId);
+	if (path == m_activeWindowPath) {
+		FocusedWindowChanged(window->windowId(), applicationId,
+				WindowInfo::MAIN);
+	}
+	WindowDestroyed(window->windowId(), oldApplicationId);
 }
 
 void BamfWindowStack::ViewOpened(const QString &path, const QString &type) {

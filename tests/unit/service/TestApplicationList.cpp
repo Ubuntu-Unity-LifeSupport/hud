@@ -238,4 +238,49 @@ TEST_F(TestApplicationList, StartsEmptyThenAddsAndRemovesApplications) {
 	ASSERT_TRUE(applicationList.applications().isEmpty());
 }
 
+// UNITY-20260929-001: window-stack-bridge follows a window that bamf moves to
+// another application with WindowCreated(new), FocusedWindowChanged(new),
+// WindowDestroyed(old). The focus ends on the new application and the old
+// one is gone.
+TEST_F(TestApplicationList, FollowsFocusedWindowMovedToAnotherApplication) {
+	windowStackMock().AddMethod(DBusTypes::WINDOW_STACK_DBUS_NAME,
+			"GetWindowStack", "", "a(usbu)", "ret = []").waitForFinished();
+
+	QSharedPointer<MockApplication> numbered(new NiceMock<MockApplication>());
+	QDBusObjectPath numberedPath(QDBusObjectPath("/path/app/0"));
+	ON_CALL(*numbered, path()).WillByDefault(ReturnRef(numberedPath));
+	ON_CALL(*numbered, isEmpty()).WillByDefault(Return(false));
+
+	QSharedPointer<MockApplication> writer(new NiceMock<MockApplication>());
+	QDBusObjectPath writerPath(QDBusObjectPath("/path/app/1"));
+	ON_CALL(*writer, path()).WillByDefault(ReturnRef(writerPath));
+	ON_CALL(*writer, isEmpty()).WillByDefault(Return(false));
+
+	ApplicationListImpl applicationList(factory, windowStack,
+			windowStackWatcher);
+
+	EXPECT_CALL(factory, newApplication(QString("62914596"))).WillOnce(
+			Return(numbered));
+	EXPECT_CALL(*numbered, addWindow(62914596));
+	applicationList.WindowCreated(62914596, "62914596");
+	applicationList.FocusedWindowChanged(62914596, "62914596", 0);
+	EXPECT_EQ(numbered, applicationList.focusedApplication());
+
+	EXPECT_CALL(factory, newApplication(QString("libreoffice-writer"))).WillOnce(
+			Return(writer));
+	EXPECT_CALL(*writer, addWindow(62914596));
+	applicationList.WindowCreated(62914596, "libreoffice-writer");
+	applicationList.FocusedWindowChanged(62914596, "libreoffice-writer", 0);
+	EXPECT_EQ(writer, applicationList.focusedApplication());
+
+	ON_CALL(*numbered, isEmpty()).WillByDefault(Return(true));
+	EXPECT_CALL(*numbered, removeWindow(62914596));
+	applicationList.WindowDestroyed(62914596, "62914596");
+
+	EXPECT_EQ(writer, applicationList.focusedApplication());
+	ASSERT_EQ(1, applicationList.applications().size());
+	EXPECT_EQ(NameObject("libreoffice-writer", writerPath),
+			applicationList.applications().at(0));
+}
+
 } // namespace
