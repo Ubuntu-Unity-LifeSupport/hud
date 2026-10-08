@@ -91,14 +91,15 @@ protected:
 	}
 
 	void createApplication(uint applicationId, bool desktopFile = true) {
-		createApplication(applicationId,
+		createApplicationWithDesktopFile(applicationId,
 				desktopFile ?
 						QString("/usr/share/applications/appid-%1.desktop").arg(
 								applicationId) :
 						QString());
 	}
 
-	void createApplication(uint applicationId, const QString &desktopFile) {
+	void createApplicationWithDesktopFile(uint applicationId,
+			const QString &desktopFile) {
 		QVariantMap properties;
 
 		QList<Method> methods;
@@ -724,7 +725,7 @@ TEST_F(TestBamfWindowStack, FocusKeptOverUnknownActiveWindow) {
 // The application id is the desktop file name without ".desktop" (bamf's
 // desktop id), not the name up to its first dot: org.gnome.Terminal, not org.
 TEST_F(TestBamfWindowStack, ReverseDnsDesktopFileGivesFullId) {
-	createApplication(0, "/usr/share/applications/org.example.Foo.desktop");
+	createApplicationWithDesktopFile(0, "/usr/share/applications/org.example.Foo.desktop");
 	createWindow(0, 0);
 	createMatcherMethods(1, 0);
 
@@ -743,7 +744,7 @@ TEST_F(TestBamfWindowStack, ReverseDnsDesktopFileGivesFullId) {
 }
 
 TEST_F(TestBamfWindowStack, MultiDotDesktopFileGivesFullId) {
-	createApplication(0, "/usr/share/applications/python3.14.desktop");
+	createApplicationWithDesktopFile(0, "/usr/share/applications/python3.14.desktop");
 	createWindow(0, 0);
 	createMatcherMethods(1, 0);
 
@@ -755,7 +756,7 @@ TEST_F(TestBamfWindowStack, MultiDotDesktopFileGivesFullId) {
 // bamf also reads applications/ subdirectories; the id is the file name
 // there too, as before (hud-service looks for applications/<id>.desktop).
 TEST_F(TestBamfWindowStack, SubdirectoryDesktopFileGivesBaseName) {
-	createApplication(0, "/usr/share/applications/kde4/foo.desktop");
+	createApplicationWithDesktopFile(0, "/usr/share/applications/kde4/foo.desktop");
 	createWindow(0, 0);
 	createMatcherMethods(1, 0);
 
@@ -767,7 +768,7 @@ TEST_F(TestBamfWindowStack, SubdirectoryDesktopFileGivesBaseName) {
 // A name without the suffix can only come from bamf's desktop file hint; it
 // is kept whole.
 TEST_F(TestBamfWindowStack, DesktopFileWithoutSuffixKeepsName) {
-	createApplication(0, "/usr/share/applications/org.example.Foo");
+	createApplicationWithDesktopFile(0, "/usr/share/applications/org.example.Foo");
 	createWindow(0, 0);
 	createMatcherMethods(1, 0);
 
@@ -779,7 +780,7 @@ TEST_F(TestBamfWindowStack, DesktopFileWithoutSuffixKeepsName) {
 // Nothing left of the name: the window id, as for no desktop file (an empty
 // id would make hud-service ignore the window).
 TEST_F(TestBamfWindowStack, DesktopFileNamedOnlySuffixGivesWindowNumber) {
-	createApplication(0, "/usr/share/applications/.desktop");
+	createApplicationWithDesktopFile(0, "/usr/share/applications/.desktop");
 	createWindow(0, 0);
 	createMatcherMethods(1, 0);
 
@@ -790,7 +791,7 @@ TEST_F(TestBamfWindowStack, DesktopFileNamedOnlySuffixGivesWindowNumber) {
 
 TEST_F(TestBamfWindowStack, WindowMovedToReverseDnsApplication) {
 	createApplication(2, false);
-	createApplication(1, "/usr/share/applications/org.example.Foo.desktop");
+	createApplicationWithDesktopFile(1, "/usr/share/applications/org.example.Foo.desktop");
 	createWindow(0, 2);
 	createMatcherMethods(1, 0);
 
