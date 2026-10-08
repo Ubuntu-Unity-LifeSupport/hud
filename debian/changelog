@@ -1,3 +1,17 @@
+hud (14.10+17.10.20170619-0ubuntu6+unity4) resolute; urgency=medium
+
+  * window-stack-bridge: follow a window that bamf moves to another
+    application. bamf announces LibreOffice's window under a temporary
+    application and moves it to libreoffice-writer when LibreOffice changes
+    the window class; the move comes only as the applications' WindowAdded
+    and WindowRemoved. The bridge kept the window number as application id,
+    so hud-service filed the window and the HUD usage history under it.
+    Now it re-reads the window's application on WindowAdded and announces
+    the window under the new id, the focus, then the old id removed
+    (UNITY-20260929-001).
+
+ -- NeiroNext <mihail.rozshko@gmail.com>  Thu, 08 Oct 2026 08:43:42 +0000
+
 hud (14.10+17.10.20170619-0ubuntu6+unity3) resolute; urgency=medium
 
   * CMakeLists.txt, tests/CMakeLists.txt: build hud itself with C++14 again,
