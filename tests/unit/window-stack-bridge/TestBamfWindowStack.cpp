@@ -34,15 +34,24 @@ using namespace QtDBusMock;
 
 namespace {
 
+// A bus name that is not bamf's, with an object at bamf's path of application
+// 1 implementing bamf's application interface
+static const QString FOREIGN_DBUS_NAME("org.example.NotBamf");
+
 class TestBamfWindowStack: public Test {
 protected:
-	TestBamfWindowStack() :
+	explicit TestBamfWindowStack(bool foreignService = false) :
 			mock(dbus) {
 
 		mock.registerCustomMock(DBusTypes::BAMF_DBUS_NAME,
 				DBusTypes::BAMF_MATCHER_DBUS_PATH,
 				OrgAyatanaBamfMatcherInterface::staticInterfaceName(),
 				QDBusConnection::SessionBus);
+		if (foreignService) {
+			mock.registerCustomMock(FOREIGN_DBUS_NAME, applicationPath(1),
+					OrgAyatanaBamfApplicationInterface::staticInterfaceName(),
+					QDBusConnection::SessionBus);
+		}
 
 		dbus.startServices();
 	}
@@ -82,14 +91,19 @@ protected:
 	}
 
 	void createApplication(uint applicationId, bool desktopFile = true) {
+		createApplication(applicationId,
+				desktopFile ?
+						QString("/usr/share/applications/appid-%1.desktop").arg(
+								applicationId) :
+						QString());
+	}
+
+	void createApplication(uint applicationId, const QString &desktopFile) {
 		QVariantMap properties;
 
 		QList<Method> methods;
 		addMethod(methods, "DesktopFile", "", "s",
-				desktopFile ?
-						QString("ret = '/usr/share/applications/appid-%1.desktop'").arg(
-								applicationId) :
-						QString("ret = ''"));
+				QString("ret = '%1'").arg(desktopFile));
 
 		bamfMatcherMock().AddObject(applicationPath(applicationId),
 				OrgAyatanaBamfApplicationInterface::staticInterfaceName(),
@@ -705,6 +719,233 @@ TEST_F(TestBamfWindowStack, FocusKeptOverUnknownActiveWindow) {
 	windowDestroyedSpy.wait();
 	EXPECT_EQ(QStringList() << "created 0 appid-1" << "focused 0 appid-1 0"
 			<< "destroyed 0 0", log);
+}
+
+// The application id is the desktop file name without ".desktop" (bamf's
+// desktop id), not the name up to its first dot: org.gnome.Terminal, not org.
+TEST_F(TestBamfWindowStack, ReverseDnsDesktopFileGivesFullId) {
+	createApplication(0, "/usr/share/applications/org.example.Foo.desktop");
+	createWindow(0, 0);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	EXPECT_EQ(WindowInfo(0, "org.example.Foo", true, WindowInfo::MAIN),
+			windowStack.GetWindowStack().at(0));
+
+	QSignalSpy windowCreatedSpy(&windowStack,
+	SIGNAL(WindowCreated(uint, const QString &)));
+	createWindow(1, 0);
+	windowOpened(windowPath(0), windowPath(1));
+	windowCreatedSpy.wait();
+	ASSERT_EQ(1, windowCreatedSpy.size());
+	EXPECT_EQ(QVariantList() << uint(1) << "org.example.Foo",
+			windowCreatedSpy.at(0));
+}
+
+TEST_F(TestBamfWindowStack, MultiDotDesktopFileGivesFullId) {
+	createApplication(0, "/usr/share/applications/python3.14.desktop");
+	createWindow(0, 0);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	EXPECT_EQ(WindowInfo(0, "python3.14", true, WindowInfo::MAIN),
+			windowStack.GetWindowStack().at(0));
+}
+
+// bamf also reads applications/ subdirectories; the id is the file name
+// there too, as before (hud-service looks for applications/<id>.desktop).
+TEST_F(TestBamfWindowStack, SubdirectoryDesktopFileGivesBaseName) {
+	createApplication(0, "/usr/share/applications/kde4/foo.desktop");
+	createWindow(0, 0);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	EXPECT_EQ(WindowInfo(0, "foo", true, WindowInfo::MAIN),
+			windowStack.GetWindowStack().at(0));
+}
+
+// A name without the suffix can only come from bamf's desktop file hint; it
+// is kept whole.
+TEST_F(TestBamfWindowStack, DesktopFileWithoutSuffixKeepsName) {
+	createApplication(0, "/usr/share/applications/org.example.Foo");
+	createWindow(0, 0);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	EXPECT_EQ(WindowInfo(0, "org.example.Foo", true, WindowInfo::MAIN),
+			windowStack.GetWindowStack().at(0));
+}
+
+// Nothing left of the name: the window id, as for no desktop file (an empty
+// id would make hud-service ignore the window).
+TEST_F(TestBamfWindowStack, DesktopFileNamedOnlySuffixGivesWindowNumber) {
+	createApplication(0, "/usr/share/applications/.desktop");
+	createWindow(0, 0);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	EXPECT_EQ(WindowInfo(0, "0", true, WindowInfo::MAIN),
+			windowStack.GetWindowStack().at(0));
+}
+
+TEST_F(TestBamfWindowStack, WindowMovedToReverseDnsApplication) {
+	createApplication(2, false);
+	createApplication(1, "/usr/share/applications/org.example.Foo.desktop");
+	createWindow(0, 2);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	QStringList log;
+	recordSignals(windowStack, log);
+	QSignalSpy windowDestroyedSpy(&windowStack,
+	SIGNAL(WindowDestroyed(uint, const QString &)));
+
+	moveWindow(0, 1);
+	windowDestroyedSpy.wait();
+	EXPECT_EQ(QStringList() << "created 0 org.example.Foo"
+			<< "focused 0 org.example.Foo 0" << "destroyed 0 0", log);
+	EXPECT_EQ(WindowInfo(0, "org.example.Foo", true, WindowInfo::MAIN),
+			windowStack.GetWindowStack().at(0));
+}
+
+// Reads the bridge's window maps
+class InspectableBamfWindowStack: public BamfWindowStack {
+public:
+	using BamfWindowStack::BamfWindowStack;
+
+	int windowCount() const {
+		return m_windows.size();
+	}
+
+	int windowByIdCount() const {
+		return m_windowsById.size();
+	}
+};
+
+// Looking up a window the bridge does not know adds no entry to its maps:
+// a path in bamf's stack it could not add, and window ids nobody has.
+TEST_F(TestBamfWindowStack, UnknownPathsLeaveNoEntries) {
+	createApplication(0);
+	createWindow(0, 0);
+	createMatcherMethods(1, 5); // window 5 is in the stack, never exported
+
+	qDebug() << "EXPECTED ERROR BELOW";
+	InspectableBamfWindowStack windowStack(dbus.sessionConnection());
+	qDebug() << "EXPECTED ERROR ABOVE";
+	const int windows(windowStack.windowCount());
+	const int windowsById(windowStack.windowByIdCount());
+	ASSERT_EQ(1, windows);
+	ASSERT_EQ(1, windowsById);
+
+	QList<WindowInfo> windowInfos(windowStack.GetWindowStack());
+	ASSERT_EQ(1, windowInfos.size());
+	EXPECT_EQ(WindowInfo(0, "appid-0", false, WindowInfo::MAIN),
+			windowInfos.at(0));
+
+	ComCanonicalUnityWindowStackInterface windowStackInterface(
+			DBusTypes::WINDOW_STACK_DBUS_NAME,
+			DBusTypes::WINDOW_STACK_DBUS_PATH, dbus.sessionConnection());
+
+	QDBusPendingReply<QStringList> properties(
+			windowStackInterface.GetWindowProperties(42, "unknown",
+					QStringList() << "some-property"));
+	QDBusPendingCallWatcher propertiesWatcher(properties);
+	QSignalSpy propertiesSpy(&propertiesWatcher,
+			SIGNAL(finished(QDBusPendingCallWatcher *)));
+	propertiesSpy.wait();
+	ASSERT_TRUE(properties.isError());
+	EXPECT_EQ(QDBusError::InvalidArgs, properties.error().type());
+
+	QDBusPendingReply<QStringList> address(
+			windowStackInterface.GetWindowBusAddress(42));
+	QDBusPendingCallWatcher addressWatcher(address);
+	QSignalSpy addressSpy(&addressWatcher,
+			SIGNAL(finished(QDBusPendingCallWatcher *)));
+	addressSpy.wait();
+	ASSERT_TRUE(address.isError());
+	EXPECT_EQ(QDBusError::InvalidArgs, address.error().type());
+
+	EXPECT_EQ(windows, windowStack.windowCount());
+	EXPECT_EQ(windowsById, windowStack.windowByIdCount());
+}
+
+// The application that sends WindowAdded is not asked: the bridge
+// re-resolves the window from its Parents().
+TEST_F(TestBamfWindowStack, WindowAddedFromAnotherApplicationUsesParents) {
+	createApplication(2, false);
+	createApplication(1);
+	createApplication(3);
+	createWindow(0, 2);
+	createMatcherMethods(1, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	QStringList log;
+	recordSignals(windowStack, log);
+	QSignalSpy windowDestroyedSpy(&windowStack,
+	SIGNAL(WindowDestroyed(uint, const QString &)));
+
+	setParents(0, QString("'%1'").arg(applicationPath(3)));
+	windowAdded(1, 0); // application 1 sends it, Parents() says 3
+	windowDestroyedSpy.wait();
+	EXPECT_EQ(QStringList() << "created 0 appid-3" << "focused 0 appid-3 0"
+			<< "destroyed 0 0", log);
+}
+
+class TestBamfWindowStackWithForeignService: public TestBamfWindowStack {
+protected:
+	TestBamfWindowStackWithForeignService() :
+			TestBamfWindowStack(true) {
+	}
+};
+
+// Only bamf's WindowAdded counts: the same signal from another bus name
+// changes nothing, although Parents() already names another application.
+TEST_F(TestBamfWindowStackWithForeignService, WindowAddedFromAnotherBusNameIsIgnored) {
+	createApplication(2, false);
+	createApplication(1);
+	createWindow(0, 2);
+	createWindow(1, 2);
+	createMatcherMethods(2, 0);
+
+	BamfWindowStack windowStack(dbus.sessionConnection());
+	QStringList log;
+	recordSignals(windowStack, log);
+	QSignalSpy windowDestroyedSpy(&windowStack,
+	SIGNAL(WindowDestroyed(uint, const QString &)));
+
+	setParents(0, QString("'%1'").arg(applicationPath(1)));
+	mock.mockInterface(FOREIGN_DBUS_NAME, applicationPath(1),
+			OrgAyatanaBamfApplicationInterface::staticInterfaceName(),
+			QDBusConnection::SessionBus).EmitSignal(
+			"org.ayatana.bamf.application", "WindowAdded", "s",
+			QVariantList() << windowPath(0)).waitForFinished();
+
+	// bamf moves window 1; its signal arrives after the foreign one
+	moveWindow(1, 1);
+	windowDestroyedSpy.wait();
+	EXPECT_EQ(QStringList() << "created 1 appid-1" << "destroyed 1 1", log);
+}
+
+TEST(ApplicationIdFromDesktopFile, IsTheFileNameWithoutDesktopSuffix) {
+	const QString dir("/usr/share/applications/");
+	EXPECT_EQ("org.example.Foo",
+			applicationIdFromDesktopFile(dir + "org.example.Foo.desktop", 7));
+	EXPECT_EQ("org.gnome.Terminal.Preferences",
+			applicationIdFromDesktopFile(
+					dir + "org.gnome.Terminal.Preferences.desktop", 7));
+	EXPECT_EQ("python3.14",
+			applicationIdFromDesktopFile(dir + "python3.14.desktop", 7));
+	EXPECT_EQ("appid-1", applicationIdFromDesktopFile(dir + "appid-1.desktop", 7));
+	EXPECT_EQ("firefox_firefox",
+			applicationIdFromDesktopFile(
+					"/var/lib/snapd/desktop/applications/firefox_firefox.desktop",
+					7));
+	EXPECT_EQ("foo", applicationIdFromDesktopFile(dir + "kde4/foo.desktop", 7));
+	EXPECT_EQ("org.example.Foo",
+			applicationIdFromDesktopFile(dir + "org.example.Foo", 7));
+	EXPECT_EQ("Foo.DESKTOP", applicationIdFromDesktopFile(dir + "Foo.DESKTOP", 7));
+	EXPECT_EQ("7", applicationIdFromDesktopFile(dir + ".desktop", 7));
+	EXPECT_EQ("7", applicationIdFromDesktopFile(QString(), 7));
 }
 
 } // namespace

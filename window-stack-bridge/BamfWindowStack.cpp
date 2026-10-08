@@ -25,6 +25,17 @@
 
 using namespace hud::common;
 
+QString applicationIdFromDesktopFile(const QString &desktopFile,
+		unsigned int windowId) {
+	static const QString SUFFIX(".desktop");
+
+	QString id(QFileInfo(desktopFile).fileName());
+	if (id.endsWith(SUFFIX)) {
+		id.chop(SUFFIX.size());
+	}
+	return id.isEmpty() ? QString::number(windowId) : id;
+}
+
 BamfWindow::BamfWindow(const QString &path, const QDBusConnection &connection) :
 		m_window(DBusTypes::BAMF_DBUS_NAME, path, connection), m_view(
 				DBusTypes::BAMF_DBUS_NAME, path, connection), m_error(false), m_windowId(
@@ -81,9 +92,7 @@ BamfWindow::Resolved BamfWindow::resolveApplicationId(QString &id) {
 		return Resolved::DESKTOP_FILE_ERROR;
 	}
 
-	QString desktopFile(desktopFileReply);
-	id = desktopFile.isEmpty() ?
-			QString::number(m_windowId) : QFileInfo(desktopFile).baseName();
+	id = applicationIdFromDesktopFile(desktopFileReply, m_windowId);
 	return Resolved::ID;
 }
 
@@ -175,9 +184,12 @@ BamfWindowStack::BamfWindowStack(const QDBusConnection &connection,
 	// window class after mapping) without a ViewOpened or ViewClosed for the
 	// window; the application it moves to sends WindowAdded. Connected before
 	// WindowPaths(), so no move after that reply is missed
-	m_connection.connect(DBusTypes::BAMF_DBUS_NAME, QString(),
+	if (!m_connection.connect(DBusTypes::BAMF_DBUS_NAME, QString(),
 			"org.ayatana.bamf.application", "WindowAdded", this,
-			SLOT(WindowAdded(const QString&)));
+			SLOT(WindowAdded(const QString&)))) {
+		qWarning()
+				<< _("Could not connect to bamf's WindowAdded; windows moved to another application keep their first id");
+	}
 
 	QDBusPendingReply<QStringList> windowPathsReply(m_matcher.WindowPaths());
 	windowPathsReply.waitForFinished();
@@ -226,7 +238,7 @@ WindowInfoList BamfWindowStack::GetWindowStack() {
 
 	QStringList stack(stackReply);
 	for (const QString &path : stack) {
-		const auto window(m_windows[path]);
+		const auto window(m_windows.value(path));
 		if (window) {
 			results
 					<< WindowInfo(window->windowId(), window->applicationId(),
@@ -261,7 +273,7 @@ QStringList BamfWindowStack::GetWindowProperties(uint windowId,
 		const QString &appId, const QStringList &names) {
 	Q_UNUSED(appId);
 	QStringList result;
-	const auto window = m_windowsById[windowId];
+	const auto window = m_windowsById.value(windowId);
 
 	if (window == nullptr) {
 		sendErrorReply(QDBusError::InvalidArgs, "Unable to find windowId");
@@ -279,7 +291,7 @@ QStringList BamfWindowStack::GetWindowProperties(uint windowId,
 }
 
 QStringList BamfWindowStack::GetWindowBusAddress(uint windowId) {
-	const auto window = m_windowsById[windowId];
+	const auto window = m_windowsById.value(windowId);
 
 	if (window == nullptr) {
 		sendErrorReply(QDBusError::InvalidArgs, "Unable to find windowId");

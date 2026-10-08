@@ -22,6 +22,9 @@
 #include <unit/service/Mocks.h>
 
 #include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QTemporaryDir>
 #include <libqtdbustest/DBusTestRunner.h>
 #include <libqtdbusmock/DBusMock.h>
 #include <gtest/gtest.h>
@@ -95,6 +98,38 @@ TEST_F(TestApplication, DBusInterfaceIsExported) {
 
 	//FIXME desktop path will return something when it's actually implemented
 	EXPECT_EQ(QString(), applicationInterface.desktopPath());
+}
+
+// window-stack-bridge gives reverse-DNS applications their full desktop id:
+// it is a valid object path, and the application finds its desktop file and
+// icon by it.
+TEST_F(TestApplication, ReverseDnsIdPathAndIcon) {
+	EXPECT_EQ("/com/canonical/hud/applications/org_2eexample_2eFoo",
+			DBusTypes::applicationPath("org.example.Foo"));
+
+	QTemporaryDir dataDir;
+	ASSERT_TRUE(dataDir.isValid());
+	ASSERT_TRUE(QDir(dataDir.path()).mkpath("applications"));
+	QFile desktopFile(
+			QDir(dataDir.path()).filePath("applications/org.example.Foo.desktop"));
+	ASSERT_TRUE(desktopFile.open(QIODevice::WriteOnly));
+	desktopFile.write("[Desktop Entry]\nType=Application\nName=Foo\nIcon=foo-icon\n");
+	desktopFile.close();
+
+	const QByteArray xdgDataDirs(qgetenv("XDG_DATA_DIRS"));
+	qputenv("XDG_DATA_DIRS", dataDir.path().toUtf8());
+
+	ApplicationImpl application("org.example.Foo", factory,
+			dbus.sessionConnection());
+	ComCanonicalHudApplicationInterface applicationInterface(
+			dbus.sessionConnection().baseService(),
+			DBusTypes::applicationPath("org.example.Foo"),
+			dbus.sessionConnection());
+	EXPECT_TRUE(applicationInterface.isValid());
+	EXPECT_EQ(desktopFile.fileName(), application.desktopPath());
+	EXPECT_EQ("foo-icon", application.icon());
+
+	qputenv("XDG_DATA_DIRS", xdgDataDirs);
 }
 
 TEST_F(TestApplication, AddsWindow) {

@@ -26,6 +26,13 @@
 #include <QMap>
 #include <QSharedPointer>
 
+// The application id for the desktop file bamf gives a window's application:
+// the file name without a trailing ".desktop", which is bamf's own desktop id
+// (org.gnome.Terminal for org.gnome.Terminal.desktop). The window id when that
+// leaves nothing (no desktop file, or a file named ".desktop")
+Q_DECL_EXPORT QString applicationIdFromDesktopFile(const QString &desktopFile,
+		unsigned int windowId);
+
 class Q_DECL_EXPORT BamfWindow {
 public:
 	// What resolveApplicationId found out: an error (Parents() or the
@@ -48,8 +55,8 @@ public:
 
 	void setApplicationId(const QString &applicationId);
 
-	// Ask bamf for the application the window is under now: on ID, id is its
-	// desktop file's base name, or the window id when it has none
+	// Ask bamf for the application the window is under now: on ID, id is
+	// applicationIdFromDesktopFile() of its desktop file
 	Resolved resolveApplicationId(QString &id);
 
 	const QString xProp(const QString &property);
