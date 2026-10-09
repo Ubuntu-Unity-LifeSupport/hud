@@ -132,6 +132,93 @@ TEST_F(TestApplication, ReverseDnsIdPathAndIcon) {
 	qputenv("XDG_DATA_DIRS", xdgDataDirs);
 }
 
+// Sets an environment variable for one test and restores it afterwards,
+// unset as unset
+class ScopedEnv {
+public:
+	ScopedEnv(const char *name, const QByteArray &value) :
+			m_name(name), m_wasSet(qEnvironmentVariableIsSet(name)), m_old(
+					qgetenv(name)) {
+		qputenv(name, value);
+	}
+
+	ScopedEnv(const char *name) :
+			m_name(name), m_wasSet(qEnvironmentVariableIsSet(name)), m_old(
+					qgetenv(name)) {
+		qunsetenv(name);
+	}
+
+	~ScopedEnv() {
+		if (m_wasSet) {
+			qputenv(m_name, m_old);
+		} else {
+			qunsetenv(m_name);
+		}
+	}
+
+private:
+	const char *m_name;
+	bool m_wasSet;
+	QByteArray m_old;
+};
+
+static void writeDesktopFile(const QString &dataDir, const QString &id,
+		const QString &icon) {
+	ASSERT_TRUE(QDir(dataDir).mkpath("applications"));
+	QFile file(QDir(dataDir).filePath("applications/" + id + ".desktop"));
+	ASSERT_TRUE(file.open(QIODevice::WriteOnly));
+	file.write(QString("[Desktop Entry]\nType=Application\nName=%1\nIcon=%2\n").arg(
+			id, icon).toUtf8());
+}
+
+// A desktop file only in the user's data directory ($XDG_DATA_HOME, e.g.
+// ~/.local/share/applications) is found, with its icon.
+TEST_F(TestApplication, DesktopFileInDataHome) {
+	QTemporaryDir home, dirs;
+	ASSERT_TRUE(home.isValid() && dirs.isValid());
+	writeDesktopFile(home.path(), "org.example.UserOnly", "user-icon");
+	ScopedEnv dataHome("XDG_DATA_HOME", home.path().toUtf8());
+	ScopedEnv dataDirs("XDG_DATA_DIRS", dirs.path().toUtf8());
+
+	ApplicationImpl application("org.example.UserOnly", factory,
+			dbus.sessionConnection());
+	EXPECT_EQ(QDir(home.path()).filePath("applications/org.example.UserOnly.desktop"),
+			application.desktopPath());
+	EXPECT_EQ("user-icon", application.icon());
+}
+
+// The XDG order: a user's desktop file overrides a system one with the same id.
+TEST_F(TestApplication, DataHomeOverridesDataDirs) {
+	QTemporaryDir home, dirs;
+	ASSERT_TRUE(home.isValid() && dirs.isValid());
+	writeDesktopFile(home.path(), "org.example.Both", "user-icon");
+	writeDesktopFile(dirs.path(), "org.example.Both", "system-icon");
+	ScopedEnv dataHome("XDG_DATA_HOME", home.path().toUtf8());
+	ScopedEnv dataDirs("XDG_DATA_DIRS", dirs.path().toUtf8());
+
+	ApplicationImpl application("org.example.Both", factory,
+			dbus.sessionConnection());
+	EXPECT_EQ("user-icon", application.icon());
+}
+
+// With XDG_DATA_DIRS unset nothing is looked up relative to the working
+// directory (the old code split "" into one empty directory, ".").
+TEST_F(TestApplication, NoCwdLookupWithoutDataDirs) {
+	QTemporaryDir home, cwd;
+	ASSERT_TRUE(home.isValid() && cwd.isValid());
+	writeDesktopFile(cwd.path(), "org.example.OnlyInCwd", "cwd-icon");
+	ScopedEnv dataHome("XDG_DATA_HOME", home.path().toUtf8());
+	ScopedEnv dataDirs("XDG_DATA_DIRS");
+	const QString oldCwd(QDir::currentPath());
+	ASSERT_TRUE(QDir::setCurrent(cwd.path()));
+
+	ApplicationImpl application("org.example.OnlyInCwd", factory,
+			dbus.sessionConnection());
+	const QString path(application.desktopPath());
+	QDir::setCurrent(oldCwd);
+	EXPECT_EQ(QString(), path);
+}
+
 TEST_F(TestApplication, AddsWindow) {
 	ApplicationImpl application("application-id", factory,
 			dbus.sessionConnection());

@@ -212,6 +212,91 @@ TEST_F(TestHudService, LegacyQuery) {
 	EXPECT_TRUE(hudService.openQueries().isEmpty());
 }
 
+// Exposes the legacy queries the service holds per sender
+class InspectableHudService: public HudServiceImpl {
+public:
+	using HudServiceImpl::HudServiceImpl;
+
+	int legacyQueryCount() const {
+		return m_legacyQueries.size();
+	}
+};
+
+// A legacy query whose sender left the bus (QueryImpl calls closeQuery for
+// it) is released, not kept per sender for the life of the service.
+TEST_F(TestHudService, LegacyQueryReleasedWhenSenderLeaves) {
+	InspectableHudService hudService(factory, applicationList,
+			dbus.sessionConnection());
+
+	QDBusObjectPath path0("/path/query0"), path1("/path/query1");
+	QList<Result> results;
+	QWeakPointer<MockQuery> first;
+	auto makeQuery = [&results](const QDBusObjectPath &path) {
+		QSharedPointer<MockQuery> query(new NiceMock<MockQuery>());
+		ON_CALL(*query, path()).WillByDefault(ReturnRef(path));
+		ON_CALL(*query, results()).WillByDefault(ReturnRef(results));
+		return query;
+	};
+	EXPECT_CALL(factory, newQuery(QString("query text"), QString("local"), Query::EmptyBehaviour::NO_SUGGESTIONS)).Times(
+			2).WillOnce(Invoke([&](const QString &, const QString &, Query::EmptyBehaviour) {
+				QSharedPointer<MockQuery> query(makeQuery(path0));
+				first = query;
+				return Query::Ptr(query);
+			})).WillOnce(Invoke([&](const QString &, const QString &, Query::EmptyBehaviour) {
+				return Query::Ptr(makeQuery(path1));
+			}));
+
+	QList<Suggestion> suggestions;
+	QDBusVariant querykey;
+	hudService.StartQuery("query text", 3, suggestions, querykey);
+	EXPECT_EQ(QList<QDBusObjectPath>() << path0, hudService.openQueries());
+	EXPECT_EQ(1, hudService.legacyQueryCount());
+	ASSERT_FALSE(first.isNull());
+
+	// what QueryImpl::serviceUnregistered does when the sender leaves
+	hudService.closeQuery(path0);
+	EXPECT_TRUE(hudService.openQueries().isEmpty());
+	EXPECT_EQ(0, hudService.legacyQueryCount());
+	EXPECT_TRUE(first.isNull());
+
+	// the same sender again: a new query
+	hudService.StartQuery("query text", 3, suggestions, querykey);
+	EXPECT_EQ(QList<QDBusObjectPath>() << path1, hudService.openQueries());
+	EXPECT_EQ(1, hudService.legacyQueryCount());
+}
+
+// CloseQuery from a sender without a legacy query (Unity closes the HUD after
+// ExecuteQuery has taken it) adds no entry to the map.
+TEST_F(TestHudService, CloseQueryWithoutLegacyQueryAddsNothing) {
+	InspectableHudService hudService(factory, applicationList,
+			dbus.sessionConnection());
+
+	QDBusVariant querykey(QString("/path/query0"));
+	hudService.CloseQuery(querykey);
+	EXPECT_EQ(0, hudService.legacyQueryCount());
+
+	QDBusObjectPath path0("/path/query0");
+	QList<Result> results;
+	QSharedPointer<MockQuery> query(new NiceMock<MockQuery>());
+	ON_CALL(*query, path()).WillByDefault(ReturnRef(path0));
+	ON_CALL(*query, results()).WillByDefault(ReturnRef(results));
+	EXPECT_CALL(factory, newQuery(QString("query text"), QString("local"), Query::EmptyBehaviour::NO_SUGGESTIONS)).Times(
+			1).WillOnce(Return(query));
+
+	QList<Suggestion> suggestions;
+	hudService.StartQuery("query text", 3, suggestions, querykey);
+	EXPECT_EQ(1, hudService.legacyQueryCount());
+
+	QDBusVariant itemKey(qulonglong(1));
+	EXPECT_CALL(*query, ExecuteCommand(itemKey, 12345)).Times(1);
+	hudService.ExecuteQuery(itemKey, 12345);
+	EXPECT_EQ(0, hudService.legacyQueryCount());
+
+	hudService.CloseQuery(querykey);
+	EXPECT_EQ(0, hudService.legacyQueryCount());
+	EXPECT_TRUE(hudService.openQueries().isEmpty());
+}
+
 TEST_F(TestHudService, RegisterApplication) {
 	QDBusObjectPath path("/foo");
 
