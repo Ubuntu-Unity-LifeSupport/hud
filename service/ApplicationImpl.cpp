@@ -22,6 +22,8 @@
 #include <service/ApplicationAdaptor.h>
 #include <service/Factory.h>
 
+#include <QStandardPaths>
+
 using namespace hud::common;
 using namespace hud::service;
 
@@ -85,19 +87,13 @@ const QDBusObjectPath & ApplicationImpl::path() const {
 
 const QString & ApplicationImpl::desktopPath() {
 	if (m_desktopPath.isEmpty()) {
-		QString desktopFile(QString("%1.desktop").arg(m_applicationId));
-
-		QStringList xdgDataDirs(
-				QString::fromUtf8(qgetenv("XDG_DATA_DIRS")).split(':'));
-		for (const QString &dir : xdgDataDirs) {
-			QString desktopPath(
-					QDir(QDir(dir).filePath("applications")).filePath(
-							desktopFile));
-			if (QFile::exists(desktopPath)) {
-				m_desktopPath = desktopPath;
-				break;
-			}
-		}
+		// The XDG search: $XDG_DATA_HOME/applications (default
+		// ~/.local/share) first, then each of $XDG_DATA_DIRS (default
+		// /usr/local/share:/usr/share). A user's desktop file overrides a
+		// system one with the same id.
+		m_desktopPath = QStandardPaths::locate(
+				QStandardPaths::ApplicationsLocation,
+				QString("%1.desktop").arg(m_applicationId));
 	}
 
 	return m_desktopPath;
