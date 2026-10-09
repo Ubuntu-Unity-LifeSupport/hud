@@ -85,7 +85,24 @@ QDBusObjectPath HudServiceImpl::CreateQuery(const QString &query,
 }
 
 Query::Ptr HudServiceImpl::closeQuery(const QDBusObjectPath &path) {
-	return m_queries.take(path);
+	// Held until the end: the query is not destroyed while the maps change.
+	Query::Ptr query(m_queries.take(path));
+
+	// A legacy query is also held per sender. When its sender leaves the bus
+	// (QueryImpl::serviceUnregistered) or closes the query object itself,
+	// that entry must go too, or the query lives as long as the service.
+	for (auto it(m_legacyQueries.begin()); it != m_legacyQueries.end(); ++it) {
+		const Query::Ptr &legacy(it.value().first);
+		if (!legacy.isNull() && legacy->path() == path) {
+			if (it.value().second) {
+				it.value().second->stop();
+			}
+			m_legacyQueries.erase(it);
+			break;
+		}
+	}
+
+	return query;
 }
 
 QString HudServiceImpl::messageSender() {
@@ -104,7 +121,8 @@ QString HudServiceImpl::StartQuery(const QString &queryString, int entries,
 		QList<Suggestion> &suggestions, QDBusVariant &querykey) {
 	QString sender(messageSender());
 
-	QPair<Query::Ptr, QSharedPointer<QTimer>> entry(m_legacyQueries[sender]);
+	// value(), not operator[]: no empty entry for a sender without a query
+	QPair<Query::Ptr, QSharedPointer<QTimer>> entry(m_legacyQueries.value(sender));
 	Query::Ptr query(entry.first);
 	QSharedPointer<QTimer> legacyTimeout(entry.second);
 	if (query.isNull()) {
@@ -171,10 +189,14 @@ void HudServiceImpl::CloseQuery(const QDBusVariant &querykey) {
 
 	// We don't actually close legacy queries, or we'd be constructing
 	// and destructing them during the search, due to the way that
-	// Unity7 uses the API.
-	QPair<Query::Ptr, QSharedPointer<QTimer>> entry(m_legacyQueries[sender]);
-	Query::Ptr query(entry.first);
-	QSharedPointer<QTimer> legacyTimeout(entry.second);
+	// Unity7 uses the API. A sender without a legacy query (Unity closes
+	// after ExecuteQuery has taken it) leaves the map unchanged.
+	auto found(m_legacyQueries.find(sender));
+	if (found == m_legacyQueries.end()) {
+		return;
+	}
+	Query::Ptr query(found.value().first);
+	QSharedPointer<QTimer> legacyTimeout(found.value().second);
 	if (!query.isNull()) {
 		query->UpdateQuery(QString());
 		legacyTimeout->start();
