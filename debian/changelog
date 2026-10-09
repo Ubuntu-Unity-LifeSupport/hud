@@ -1,3 +1,16 @@
+hud (14.10+17.10.20170619-0ubuntu6+unity6) resolute; urgency=medium
+
+  * hud-service: release a legacy query when its sender leaves the bus. A
+    StartQuery client that exited without CloseQuery left its query, and its
+    Columbus Matcher, held for the life of the service; StartQuery and
+    CloseQuery no longer insert an empty entry for a sender without a query
+    (UNITY-20261008-025).
+  * hud-service: find desktop files where the XDG spec says, the user's
+    ~/.local/share/applications (XDG_DATA_HOME) first, so applications
+    installed for the user get their icon (UNITY-20261008-017).
+
+ -- NeiroNext <mihail.rozshko@gmail.com>  Fri, 09 Oct 2026 01:29:19 +0000
+
 hud (14.10+17.10.20170619-0ubuntu6+unity5) resolute; urgency=medium
 
   * window-stack-bridge: the application id is the desktop file name
