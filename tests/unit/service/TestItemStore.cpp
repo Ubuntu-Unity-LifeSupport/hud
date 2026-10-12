@@ -298,6 +298,34 @@ TEST_F(TestItemStore, BlankSearchNoSuggestions) {
 	ASSERT_TRUE(results.empty());
 }
 
+/*
+ * UNITY-20261009-003: executing an id the store does not hold must not add
+ * a null item, which the next blank search with suggestions would use.
+ */
+TEST_F(TestItemStore, ExecuteUnknownIdLeavesStoreUnchanged) {
+	QMenu root;
+
+	QMenu file("File");
+	file.addAction("Save As...");
+	file.addAction("Save");
+	root.addMenu(&file);
+
+	store->indexMenu(&root);
+
+	EXPECT_CALL(*usageTracker, markUsage(_, _)).Times(0);
+	store->execute(1000);
+	QString prefix, baseAction;
+	QDBusObjectPath actionPath, modelPath;
+	store->executeParameterized(1001, prefix, baseAction, actionPath,
+			modelPath);
+	store->executeToolbar("no-such-toolbar-item");
+
+	QList<Result> results;
+	store->search("", Query::EmptyBehaviour::SHOW_SUGGESTIONS, results);
+	EXPECT_EQ(2, results.size());
+	EXPECT_TRUE(store->toolbarItems().isEmpty());
+}
+
 TEST_F(TestItemStore, ExecuteMarksHistory) {
 	QMenu root;
 

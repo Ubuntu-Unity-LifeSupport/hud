@@ -81,6 +81,17 @@ target_link_libraries(test-menu-input-model-shortcuts
   hud-test-interface
 )
 
+############################################
+# Menu input model with item targets (+unity7)
+############################################
+
+add_executable(test-menu-input-model-target test-menu-input-model-target.c)
+target_link_libraries(test-menu-input-model-target
+  ${GOBJECT2_LIBRARIES}
+  ${GIO2_LIBRARIES}
+  hud-test-interface
+)
+
 ####################################
 # Menu input model toolbar undo item
 ####################################
