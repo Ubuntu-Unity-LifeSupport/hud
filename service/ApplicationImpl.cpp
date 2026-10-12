@@ -22,6 +22,9 @@
 #include <service/ApplicationAdaptor.h>
 #include <service/Factory.h>
 
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QStandardPaths>
 
 using namespace hud::common;
@@ -91,9 +94,30 @@ const QString & ApplicationImpl::desktopPath() {
 		// ~/.local/share) first, then each of $XDG_DATA_DIRS (default
 		// /usr/local/share:/usr/share). A user's desktop file overrides a
 		// system one with the same id.
-		m_desktopPath = QStandardPaths::locate(
-				QStandardPaths::ApplicationsLocation,
-				QString("%1.desktop").arg(m_applicationId));
+		const QString name(QString("%1.desktop").arg(m_applicationId));
+		const QString dataHome(
+				QFile::decodeName(qgetenv("XDG_DATA_HOME")));
+		if (dataHome.isEmpty() || dataHome.startsWith('/')) {
+			m_desktopPath = QStandardPaths::locate(
+					QStandardPaths::ApplicationsLocation, name);
+		} else {
+			// A relative XDG_DATA_HOME is invalid and must be ignored
+			// (XDG Base Directory spec), but Qt 5 uses it as it is, against
+			// the working directory (UNITY-20261009-005). Use the default
+			// instead. Qt puts exactly one entry, the one built from
+			// XDG_DATA_HOME, before the XDG_DATA_DIRS ones, so mid(1)
+			// leaves those (Qt already drops relative XDG_DATA_DIRS entries).
+			QStringList dirs(QStandardPaths::standardLocations(
+					QStandardPaths::ApplicationsLocation).mid(1));
+			dirs.prepend(QDir::homePath() + "/.local/share/applications");
+			for (const QString &dir : dirs) {
+				const QString path(dir + "/" + name);
+				if (QFileInfo(path).isFile()) {
+					m_desktopPath = path;
+					break;
+				}
+			}
+		}
 	}
 
 	return m_desktopPath;
