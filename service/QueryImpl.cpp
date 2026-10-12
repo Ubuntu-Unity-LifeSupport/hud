@@ -119,19 +119,50 @@ void QueryImpl::CloseQuery() {
 	m_service.closeQuery(m_path);
 }
 
+/**
+ * Reads the item key and checks that there is a window to run it in. On a
+ * failure it logs, and replies with an error only when the call came over
+ * D-Bus to this query: the legacy ExecuteQuery reaches here directly, through
+ * HudServiceImpl, and has no message to answer (UNITY-20261009-003).
+ */
+bool QueryImpl::commandId(const QDBusVariant &item, qulonglong &id) {
+	bool ok = false;
+	if (item.variant().canConvert<qlonglong>()) {
+		// Qt 5 converts any string to qlonglong ("not-a-number" to 0), so
+		// check that the conversion itself succeeds
+		id = item.variant().toULongLong(&ok);
+	}
+	if (!ok) {
+		qWarning() << "Failed to execute command - invalid item key"
+				<< item.variant();
+		if (calledFromDBus()) {
+			sendErrorReply(QDBusError::InvalidArgs,
+					"Failed to execute command - invalid item key");
+		}
+		return false;
+	}
+
+	if (m_windowToken.isNull()) {
+		qWarning() << "Failed to execute command - no focused window";
+		if (calledFromDBus()) {
+			sendErrorReply(QDBusError::Failed,
+					"Failed to execute command - no focused window");
+		}
+		return false;
+	}
+
+	return true;
+}
+
 void QueryImpl::ExecuteCommand(const QDBusVariant &item, uint timestamp) {
 	Q_UNUSED(timestamp);
 
-	if (!item.variant().canConvert<qlonglong>()) {
-		qWarning() << "Failed to execute command - invalid item key"
-				<< item.variant();
-		sendErrorReply(QDBusError::InvalidArgs,
-				"Failed to execute command - invalid item key");
+	qulonglong id(0);
+	if (!commandId(item, id)) {
 		return;
 	}
 
-	qulonglong commandId(item.variant().toULongLong());
-	m_windowToken->execute(commandId);
+	m_windowToken->execute(id);
 }
 
 /**
@@ -153,17 +184,13 @@ QString QueryImpl::ExecuteParameterized(const QDBusVariant &item,
 		int &modelSection) {
 	Q_UNUSED(timestamp);
 
-	if (!item.variant().canConvert<qlonglong>()) {
-		qWarning() << "Failed to execute command - invalid item key"
-				<< item.variant();
-		sendErrorReply(QDBusError::InvalidArgs,
-				"Failed to execute command - invalid item key");
+	qulonglong id(0);
+	if (!commandId(item, id)) {
 		return QString();
 	}
 
-	qulonglong commandId(item.variant().toULongLong());
 	modelSection = 1;
-	return m_windowToken->executeParameterized(commandId, prefix, baseAction,
+	return m_windowToken->executeParameterized(id, prefix, baseAction,
 			actionPath, modelPath);
 }
 

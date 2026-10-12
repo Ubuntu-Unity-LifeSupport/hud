@@ -296,7 +296,7 @@ void ItemStore::executeItem(Item::Ptr item) {
 }
 
 void ItemStore::execute(unsigned long long int commandId) {
-	Item::Ptr item(m_items[commandId]);
+	Item::Ptr item(m_items.value(commandId));
 	executeItem(item);
 }
 
@@ -304,7 +304,7 @@ QString ItemStore::executeParameterized(unsigned long long commandId,
 		QString &prefix, QString &baseAction, QDBusObjectPath &actionPath,
 		QDBusObjectPath &modelPath) {
 
-	Item::Ptr item(m_items[commandId]);
+	Item::Ptr item(m_items.value(commandId));
 	if (item.isNull()) {
 		qWarning() << "Tried to execute unknown parameterized command"
 				<< commandId;
@@ -336,7 +336,7 @@ QString ItemStore::executeParameterized(unsigned long long commandId,
 }
 
 void ItemStore::executeToolbar(const QString &name) {
-	executeItem(m_toolbarItems[name]);
+	executeItem(m_toolbarItems.value(name));
 }
 
 QList<QStringList> ItemStore::commands() const {

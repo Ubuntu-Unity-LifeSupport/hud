@@ -87,6 +87,8 @@ protected Q_SLOTS:
 protected:
 	void updateToken(Window::Ptr window);
 
+	bool commandId(const QDBusVariant &item, qulonglong &id);
+
 	void notifyPropertyChanged(const QString& interface,
 			const QString& propertyName);
 
