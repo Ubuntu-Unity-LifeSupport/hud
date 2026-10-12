@@ -18,12 +18,15 @@
 
 #include <libhud-client/HudClient.h>
 #include <common/DBusTypes.h>
+#include <common/Suggestion.h>
 #include <common/WindowStackInterface.h>
 #include <tests/testutils/HudTestInterface.h>
 
 #include <QAction>
 #include <QDebug>
 #include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusMetaType>
 #include <QMenu>
 #include <QString>
 #include <QSignalSpy>
@@ -379,6 +382,102 @@ TEST_F(TestHud, ExecuteGMenuAction) {
 	actionInvokedSpy.wait();
 	ASSERT_FALSE(actionInvokedSpy.isEmpty());
 	EXPECT_EQ(QVariantList() << QVariant("close"), actionInvokedSpy.at(0));
+}
+
+/*
+ * The legacy API Unity 7 uses (UNITY-20261009-004): StartQuery with a search
+ * word, then ExecuteQuery with the key of the first suggestion that names it.
+ * Returns false if no suggestion names the word within about five seconds.
+ */
+static bool legacyExecute(QDBusConnection connection, const QString &word) {
+	hud::common::Suggestion::registerMetaTypes();
+	for (int attempt = 0; attempt < 20; ++attempt) {
+		QDBusMessage start(QDBusMessage::createMethodCall(
+				DBusTypes::HUD_SERVICE_DBUS_NAME, DBusTypes::HUD_SERVICE_DBUS_PATH,
+				"com.canonical.hud", "StartQuery"));
+		start << word << 5;
+		QDBusMessage reply(connection.call(start));
+		if (reply.type() == QDBusMessage::ReplyMessage
+				&& reply.arguments().size() == 3) {
+			QList<hud::common::Suggestion> suggestions(
+					qdbus_cast<QList<hud::common::Suggestion>>(
+							reply.arguments().at(1)));
+			for (const hud::common::Suggestion &suggestion : suggestions) {
+				QString name(suggestion.m_description);
+				name.remove("<b>");
+				name.remove("</b>");
+				if (name.contains(word)) {
+					QDBusMessage execute(QDBusMessage::createMethodCall(
+							DBusTypes::HUD_SERVICE_DBUS_NAME,
+							DBusTypes::HUD_SERVICE_DBUS_PATH,
+							"com.canonical.hud", "ExecuteQuery"));
+					execute << QVariant::fromValue(QDBusVariant(suggestion.m_id))
+							<< uint(0);
+					connection.call(execute);
+					return true;
+				}
+			}
+		}
+		QTestEventLoop::instance().enterLoopMSecs(250);
+	}
+	return false;
+}
+
+TEST_F(TestHud, LegacyExecuteUsesItemTarget) {
+	startGMenu("menu.name", "/menu", MODEL_TARGET);
+	ComCanonicalHudTestInterface gmenuTestInterface("menu.name", "/menu",
+			dbus.sessionConnection());
+
+	windowStackMock().AddMethod(DBusTypes::WINDOW_STACK_DBUS_NAME,
+			"GetWindowStack", "", "a(usbu)", "ret = [(0, 'app0', True, 0)]").waitForFinished();
+
+	windowStackMock().AddMethod(DBusTypes::WINDOW_STACK_DBUS_NAME,
+			"GetWindowProperties", "usas", "as", "ret = []\n"
+					"if args[0] == 0:\n"
+					"  ret.append('menu.name')\n"
+					"  ret.append('')\n"
+					"  ret.append('/menu')\n"
+					"  ret.append('')\n"
+					"  ret.append('')\n"
+					"  ret.append('/menu')\n"
+					"else:\n"
+					"  for arg in args[2]:\n"
+					"    ret.append('')").waitForFinished();
+
+	// There are no DBusMenus in this test
+	appmenuRegstrarMock().AddMethod(DBusTypes::APPMENU_REGISTRAR_DBUS_NAME,
+			"GetMenuForWindow", "u", "so", "ret = ('', '/')").waitForFinished();
+
+	startHud();
+
+	QSignalSpy invoked(&gmenuTestInterface,
+			SIGNAL(ActionInvoked(const QString &)));
+
+	// Each item is activated with its own target, printed with its type
+	const QList<QPair<QString, QString>> cases {
+		{ "Window", "new-terminal ('window', 'current')" },
+		{ "Small", "size-to (uint32 80, uint32 24)" },
+		{ "List", "view 'list'" },
+		{ "Bold", "bold NULL" },
+	};
+	for (const QPair<QString, QString> &c : cases) {
+		invoked.clear();
+		ASSERT_TRUE(legacyExecute(dbus.sessionConnection(), c.first))
+				<< qPrintable(c.first);
+		if (invoked.isEmpty()) {
+			invoked.wait(2000);
+		}
+		ASSERT_EQ(1, invoked.size()) << qPrintable(c.first);
+		EXPECT_EQ(c.second, invoked.at(0).at(0).toString())
+				<< qPrintable(c.first);
+	}
+
+	// An item with a target for an action that takes no parameter is
+	// insensitive in GTK: it must not run
+	invoked.clear();
+	ASSERT_TRUE(legacyExecute(dbus.sessionConnection(), "Plain"));
+	invoked.wait(1000);
+	EXPECT_TRUE(invoked.isEmpty());
 }
 
 TEST_F(TestHud, ExecuteParameterized) {

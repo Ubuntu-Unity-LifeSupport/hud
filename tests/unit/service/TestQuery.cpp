@@ -23,6 +23,7 @@
 #include <libqtdbustest/DBusTestRunner.h>
 #include <libqtdbustest/QProcessDBusService.h>
 #include <libqtdbusmock/DBusMock.h>
+#include <QDBusMessage>
 #include <QSignalSpy>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -137,6 +138,101 @@ TEST_F(TestQuery, ExecuteCommand) {
 
 	EXPECT_CALL(*windowToken, execute(123));
 	query.ExecuteCommand(QDBusVariant(123), 12345);
+}
+
+/*
+ * UNITY-20261009-003. Unity 7's ExecuteQuery reaches ExecuteCommand directly,
+ * through HudServiceImpl, not over D-Bus on the query object: an error reply
+ * there has no message to answer.
+ */
+TEST_F(TestQuery, ExecuteCommandWithStructureKeyOutsideDBus) {
+	QueryImpl query(0, "query", "keep.alive",
+			Query::EmptyBehaviour::SHOW_SUGGESTIONS, *hudService,
+			applicationList, voice, dbus.sessionConnection());
+
+	EXPECT_CALL(*windowToken, execute(_)).Times(0);
+	query.ExecuteCommand(
+			QDBusVariant(QStringList() << "not" << "a-number"), 12345);
+}
+
+TEST_F(TestQuery, ExecuteCommandWithNonNumericStringKey) {
+	QueryImpl query(0, "query", "keep.alive",
+			Query::EmptyBehaviour::SHOW_SUGGESTIONS, *hudService,
+			applicationList, voice, dbus.sessionConnection());
+
+	// Qt 5 converts any string to qlonglong, "not-a-number" to 0
+	EXPECT_CALL(*windowToken, execute(_)).Times(0);
+	query.ExecuteCommand(QDBusVariant(QString("not-a-number")), 12345);
+}
+
+TEST_F(TestQuery, ExecuteCommandWithNumericStringKey) {
+	QueryImpl query(0, "query", "keep.alive",
+			Query::EmptyBehaviour::SHOW_SUGGESTIONS, *hudService,
+			applicationList, voice, dbus.sessionConnection());
+
+	EXPECT_CALL(*windowToken, execute(7));
+	query.ExecuteCommand(QDBusVariant(QString("7")), 12345);
+}
+
+TEST_F(TestQuery, ExecuteCommandWithoutFocusedWindow) {
+	// The constructor already refreshes, so there is never a window token
+	ON_CALL(*applicationList, focusedWindow()).WillByDefault(
+			Return(Window::Ptr()));
+	QueryImpl query(0, "query", "keep.alive",
+			Query::EmptyBehaviour::SHOW_SUGGESTIONS, *hudService,
+			applicationList, voice, dbus.sessionConnection());
+
+	EXPECT_CALL(*windowToken, execute(_)).Times(0);
+	query.ExecuteCommand(QDBusVariant(qulonglong(0)), 12345);
+}
+
+TEST_F(TestQuery, ExecuteCommandWithBadKeyOverDBus) {
+	QueryImpl query(0, "query", "keep.alive",
+			Query::EmptyBehaviour::SHOW_SUGGESTIONS, *hudService,
+			applicationList, voice, dbus.sessionConnection());
+
+	EXPECT_CALL(*windowToken, execute(_)).Times(0);
+	QDBusMessage call(QDBusMessage::createMethodCall(
+			dbus.sessionConnection().baseService(), query.path().path(),
+			"com.canonical.hud.query", "ExecuteCommand"));
+	call << QVariant::fromValue(
+			QDBusVariant(QStringList() << "not" << "a-number")) << uint(12345);
+	QDBusMessage reply(dbus.sessionConnection().call(call));
+	EXPECT_EQ(QDBusMessage::ErrorMessage, reply.type());
+	EXPECT_EQ(QString("org.freedesktop.DBus.Error.InvalidArgs"),
+			reply.errorName());
+}
+
+TEST_F(TestQuery, ExecuteParameterizedWithBadKeys) {
+	QueryImpl query(0, "query", "keep.alive",
+			Query::EmptyBehaviour::SHOW_SUGGESTIONS, *hudService,
+			applicationList, voice, dbus.sessionConnection());
+
+	QString prefix, baseAction;
+	QDBusObjectPath actionPath, modelPath;
+	int modelSection = 0;
+	EXPECT_CALL(*windowToken, executeParameterized(_, _, _, _, _)).Times(0);
+	query.ExecuteParameterized(
+			QDBusVariant(QStringList() << "not" << "a-number"), 12345,
+			prefix, baseAction, actionPath, modelPath, modelSection);
+	query.ExecuteParameterized(QDBusVariant(QString("not-a-number")), 12345,
+			prefix, baseAction, actionPath, modelPath, modelSection);
+}
+
+TEST_F(TestQuery, ExecuteParameterizedWithoutFocusedWindow) {
+	ON_CALL(*applicationList, focusedWindow()).WillByDefault(
+			Return(Window::Ptr()));
+	QueryImpl query(0, "query", "keep.alive",
+			Query::EmptyBehaviour::SHOW_SUGGESTIONS, *hudService,
+			applicationList, voice, dbus.sessionConnection());
+
+	QString prefix, baseAction;
+	QDBusObjectPath actionPath, modelPath;
+	int modelSection = 0;
+	EXPECT_CALL(*windowToken, executeParameterized(_, _, _, _, _)).Times(0);
+	EXPECT_EQ(QString(), query.ExecuteParameterized(
+			QDBusVariant(qulonglong(0)), 12345, prefix, baseAction,
+			actionPath, modelPath, modelSection));
 }
 
 TEST_F(TestQuery, CloseWhenSenderDies) {

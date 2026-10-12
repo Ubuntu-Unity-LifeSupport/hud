@@ -219,6 +219,51 @@ TEST_F(TestApplication, NoCwdLookupWithoutDataDirs) {
 	EXPECT_EQ(QString(), path);
 }
 
+// Changes the working directory for one test and restores it afterwards, also
+// when an assertion ends the test early
+class ScopedCwd {
+public:
+	explicit ScopedCwd(const QString &dir) :
+			m_old(QDir::currentPath()), m_ok(QDir::setCurrent(dir)) {
+	}
+
+	~ScopedCwd() {
+		QDir::setCurrent(m_old);
+	}
+
+	bool ok() const {
+		return m_ok;
+	}
+
+private:
+	QString m_old;
+	bool m_ok;
+};
+
+// UNITY-20261009-005: a relative XDG_DATA_HOME is invalid (XDG Base Directory
+// spec) and is ignored. The default $HOME/.local/share is used, and nothing is
+// looked up relative to the working directory.
+TEST_F(TestApplication, RelativeDataHomeIgnored) {
+	QTemporaryDir home, cwd, dirs;
+	ASSERT_TRUE(home.isValid() && cwd.isValid() && dirs.isValid());
+	writeDesktopFile(QDir(cwd.path()).filePath("rel"), "org.example.Relative",
+			"cwd-icon");
+	writeDesktopFile(QDir(home.path()).filePath(".local/share"),
+			"org.example.Relative", "home-icon");
+	ScopedEnv homeDir("HOME", home.path().toUtf8());
+	ScopedEnv dataHome("XDG_DATA_HOME", "rel");
+	ScopedEnv dataDirs("XDG_DATA_DIRS", dirs.path().toUtf8());
+	ScopedCwd inCwd(cwd.path());
+	ASSERT_TRUE(inCwd.ok());
+
+	ApplicationImpl application("org.example.Relative", factory,
+			dbus.sessionConnection());
+	EXPECT_EQ(QDir(home.path()).filePath(
+			".local/share/applications/org.example.Relative.desktop"),
+			application.desktopPath());
+	EXPECT_EQ("home-icon", application.icon());
+}
+
 TEST_F(TestApplication, AddsWindow) {
 	ApplicationImpl application("application-id", factory,
 			dbus.sessionConnection());

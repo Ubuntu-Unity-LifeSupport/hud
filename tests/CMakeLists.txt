@@ -37,6 +37,7 @@ add_definitions(-DDBUSMENU_JSON_LOADER="${CMAKE_CURRENT_BINARY_DIR}/menus/dbusme
 add_definitions(-DMODEL_DEEP="${CMAKE_CURRENT_BINARY_DIR}/menus/test-menu-input-model-deep")
 add_definitions(-DMODEL_SIMPLE="${CMAKE_CURRENT_BINARY_DIR}/menus/test-menu-input-model-simple")
 add_definitions(-DMODEL_SHORTCUTS="${CMAKE_CURRENT_BINARY_DIR}/menus/test-menu-input-model-shortcuts")
+add_definitions(-DMODEL_TARGET="${CMAKE_CURRENT_BINARY_DIR}/menus/test-menu-input-model-target")
 add_definitions(-DMODEL_TOOLBAR_UNDO="${CMAKE_CURRENT_BINARY_DIR}/menus/test-menu-input-model-toolbar-undo")
 add_definitions(-DMODEL_TOOLBAR_UNKNOWN="${CMAKE_CURRENT_BINARY_DIR}/menus/test-menu-input-model-toolbar-unknown")
 add_definitions(-DMODEL_TOOLBAR_ALL="${CMAKE_CURRENT_BINARY_DIR}/menus/test-menu-input-model-toolbar-all")
