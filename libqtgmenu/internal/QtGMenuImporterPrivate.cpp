@@ -126,8 +126,8 @@ void QtGMenuImporterPrivate::LinkMenuActions()
   {
     for( auto& action_group : m_action_groups )
     {
-      connect( m_menu_model.get(), SIGNAL( ActionTriggered( QString, bool ) ), action_group.get(),
-          SLOT( TriggerAction( QString, bool ) ) );
+      connect( m_menu_model.get(), qOverload< QString, bool, QString >( &QtGMenuModel::ActionTriggered ),
+          action_group.get(), &QtGActionGroup::TriggerAction );
 
       connect( m_menu_model.get(), SIGNAL( MenuItemsChanged( QtGMenuModel*, int, int, int ) ),
           action_group.get(), SLOT( EmitStates() ) );

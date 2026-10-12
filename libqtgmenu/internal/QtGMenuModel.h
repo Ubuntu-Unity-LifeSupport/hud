@@ -55,6 +55,8 @@ public:
   std::shared_ptr< QMenu > GetQMenu();
 
   constexpr static const char* c_property_actionName = "actionName";
+  // The menu item's target as g_variant_print(target, TRUE), if it has one
+  constexpr static const char* c_property_actionTarget = "actionTarget";
   constexpr static const char* c_property_isParameterized = "isParameterized";
   constexpr static const char* c_property_busName = "busName";
   constexpr static const char* c_property_actionsPath = "actionsPath";
@@ -64,7 +66,7 @@ public:
 
 Q_SIGNALS:
   void MenuItemsChanged( QtGMenuModel* model, int index, int removed, int added );
-  void ActionTriggered( QString action_name, bool checked );
+  void ActionTriggered( QString action_name, bool checked, QString target );
   void MenuInvalid();
 
 public Q_SLOTS:

@@ -1,5 +1,6 @@
 set(
     UNIT_TESTS_SRC
+    TestActivationParameter.cpp
     TestQtGMenu.cpp
 )
 

@@ -166,7 +166,8 @@ std::shared_ptr< QMenu > QtGMenuModel::GetQMenu()
 void QtGMenuModel::ActionTriggered( bool checked )
 {
   QAction* action = dynamic_cast< QAction* >( QObject::sender() );
-  emit ActionTriggered( action->property( c_property_actionName ).toString(), checked );
+  emit ActionTriggered( action->property( c_property_actionName ).toString(), checked,
+      action->property( c_property_actionTarget ).toString() );
 }
 
 void QtGMenuModel::ActionEnabled( QString action_name, bool enabled )
@@ -382,8 +383,9 @@ void QtGMenuModel::InsertChild( QSharedPointer<QtGMenuModel> child, int index )
   connect( child.data(), SIGNAL( MenuItemsChanged( QtGMenuModel*, int, int, int ) ), this,
       SIGNAL( MenuItemsChanged( QtGMenuModel*, int, int, int ) ) );
 
-  connect( child.data(), SIGNAL( ActionTriggered( QString, bool ) ), this,
-      SIGNAL( ActionTriggered( QString, bool ) ) );
+  // Function pointers, so that a signature mismatch fails to compile
+  connect( child.data(), qOverload< QString, bool, QString >( &QtGMenuModel::ActionTriggered ),
+      this, qOverload< QString, bool, QString >( &QtGMenuModel::ActionTriggered ) );
 
   connect( child.data(), SIGNAL( MenuInvalid() ), this, SIGNAL( MenuInvalid() ) );
 
@@ -414,6 +416,18 @@ QAction* QtGMenuModel::CreateAction( int index )
     g_free( action_name );
 
     action->setProperty( c_property_actionName, qaction_name );
+  }
+
+  // action target (UNITY-20261009-004): kept as typed text, so that it parses
+  // back to the same type, e.g. (uint32 80, uint32 24) rather than int32
+  GVariant* target = g_menu_model_get_item_attribute_value( m_model.data(), index,
+      G_MENU_ATTRIBUTE_TARGET, nullptr );
+  if( target )
+  {
+    gchar* printed = g_variant_print( target, TRUE );
+    action->setProperty( c_property_actionTarget, QString::fromUtf8( printed ) );
+    g_free( printed );
+    g_variant_unref( target );
   }
 
   // is parameterized (set false by default until signal received)
@@ -462,8 +476,8 @@ QAction* QtGMenuModel::CreateAction( int index )
     action->setProperty( c_property_keywords, qkeywords );
   }
 
-  // action trigger
-  connect( action, SIGNAL( triggered( bool ) ), this, SLOT( ActionTriggered( bool ) ) );
+  // action trigger; the slot shares its name with the three-argument signal
+  connect( action, &QAction::triggered, this, qOverload< bool >( &QtGMenuModel::ActionTriggered ) );
 
   return action;
 }

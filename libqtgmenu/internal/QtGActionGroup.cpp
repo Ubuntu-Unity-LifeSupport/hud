@@ -19,6 +19,8 @@
 #include <QtGActionGroup.h>
 #include <QtGMenuUtils.h>
 
+#include <QDebug>
+
 using namespace qtgmenu;
 
 QtGActionGroup::QtGActionGroup( QSharedPointer<GDBusConnection> connection,
@@ -72,8 +74,62 @@ QSharedPointer<GActionGroup> QtGActionGroup::ActionGroup() const
   return m_action_group;
 }
 
-void QtGActionGroup::TriggerAction( QString action_name, bool checked )
+QtGActionGroup::Activation QtGActionGroup::ActivationParameter( bool known,
+    const GVariantType* type, const QString& target, const QByteArray& name )
 {
+  const Activation none{ false, nullptr };
+
+  // Unknown, or not described yet: a GDBusActionGroup knows no action until
+  // its DescribeAll reply has arrived. GTK keeps such an item insensitive.
+  if( !known )
+  {
+    return none;
+  }
+
+  if( target.isEmpty() )
+  {
+    if( type == nullptr )
+    {
+      return { true, nullptr };
+    }
+    // hud's own compatibility rule, not GTK's: a string parameter without a
+    // target gets the action's name
+    if( g_variant_type_equal( type, G_VARIANT_TYPE_STRING ) )
+    {
+      return { true, g_variant_ref_sink( g_variant_new_string( name.constData() ) ) };
+    }
+    return none;
+  }
+
+  // A target for an action that takes no parameter: insensitive in GTK
+  if( type == nullptr )
+  {
+    return none;
+  }
+
+  // Parsed without the expected type, so that a wrongly typed target is
+  // refused by the type check rather than read as the expected type.
+  // g_variant_parse returns a non-floating reference.
+  const QByteArray text( target.toUtf8() );
+  GError* error = nullptr;
+  GVariant* value = g_variant_parse( nullptr, text.constData(), nullptr, nullptr, &error );
+  if( value == nullptr )
+  {
+    g_error_free( error );
+    return none;
+  }
+  if( !g_variant_is_of_type( value, type ) )
+  {
+    g_variant_unref( value );
+    return none;
+  }
+  return { true, value };
+}
+
+void QtGActionGroup::TriggerAction( QString action_name, bool checked, QString target )
+{
+  Q_UNUSED( checked );
+
   QPair<QString, QString> split = QtGMenuUtils::splitPrefixAndName(action_name);
   const QString& prefix(split.first);
 
@@ -85,20 +141,24 @@ void QtGActionGroup::TriggerAction( QString action_name, bool checked )
   const QString& action(split.second);
   QByteArray action_utf = action.toUtf8();
 
-  const GVariantType* type = g_action_group_get_action_parameter_type( m_action_group.data(),
-		  action_utf.constData() );
+  const GVariantType* type = nullptr;
+  const bool known = g_action_group_query_action( m_action_group.data(), action_utf.constData(),
+      nullptr, &type, nullptr, nullptr, nullptr );
 
-  if( type == nullptr )
+  const Activation activation = ActivationParameter( known, type, target, action_utf );
+  if( !activation.activate )
   {
-    g_action_group_activate_action( m_action_group.data(), action_utf.constData(), nullptr );
+    qWarning() << "Not activating" << action_name << "with target" << target
+        << ( known ? "" : "(unknown action)" ) << "parameter type"
+        << ( type != nullptr ? g_variant_type_peek_string( type ) : "none" );
+    return;
   }
-  else
+
+  g_action_group_activate_action( m_action_group.data(), action_utf.constData(),
+      activation.parameter );
+  if( activation.parameter != nullptr )
   {
-    ///! need to evaluate and send parameter value
-    if( g_variant_type_equal( type, G_VARIANT_TYPE_STRING ) )
-    {
-      g_action_group_activate_action( m_action_group.data(), action_utf.constData(), g_variant_new_string( action_utf.constData() ) );
-    }
+    g_variant_unref( activation.parameter );
   }
 }
 

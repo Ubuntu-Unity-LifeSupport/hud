@@ -42,6 +42,29 @@ public:
 
   QSharedPointer<GActionGroup> ActionGroup() const;
 
+  // Whether and with what to activate an action from a menu item
+  // (UNITY-20261009-004). The parameter is a non-floating reference owned by
+  // the caller, or nullptr.
+  struct Activation
+  {
+    bool activate;
+    GVariant* parameter;
+  };
+
+  // known: the group knows the action (g_action_group_query_action); type:
+  // its parameter type, nullptr for none; target: the menu item's target as
+  // g_variant_print(target, TRUE) gives it, empty for none; name: the action
+  // name. As GTK's menu tracker: an item with a target runs with it when the
+  // action takes a parameter of the target's type; an item without one runs
+  // without a parameter when the action takes none; anything else does not
+  // run. One rule of hud's own is kept: no target and a string parameter run
+  // with the action's name.
+  static Activation ActivationParameter( bool known, const GVariantType* type,
+      const QString& target, const QByteArray& name );
+
+public Q_SLOTS:
+  void TriggerAction( QString action_name, bool checked, QString target );
+
 Q_SIGNALS:
   void ActionAdded( QString action_name );
   void ActionRemoved( QString action_name );
@@ -50,7 +73,6 @@ Q_SIGNALS:
   void ActionStateChanged( QString action_name, QVariant value );
 
 private Q_SLOTS:
-  void TriggerAction( QString action_name, bool checked );
   void EmitStates();
 
 private:
